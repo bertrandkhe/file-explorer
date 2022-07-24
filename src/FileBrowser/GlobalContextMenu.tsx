@@ -6,7 +6,8 @@ import React, { useCallback } from 'react';
 import { useAtom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
 import { newFolderDialogVisibleAtom } from './NewFolderDialog';
-import { queueFilesForUploadAtom } from './UploadsManager';
+import { useUploadControls } from './UploadsService';
+import { cwdAtom } from './FileBrowser.atoms';
 
 const PREFIX = 'GlobalContextMenu';
 
@@ -56,8 +57,9 @@ export const contextMenuStateAtom = atomWithReducer<{
 
 const GlobalContextMenu: React.FC = () => {
   const [contextMenuState, dispatchContextMenuState] = useAtom(contextMenuStateAtom);
-  const [, queueFilesForUpload] = useAtom(queueFilesForUploadAtom);
+  const { uploadFiles } = useUploadControls();
   const [, setNewFolderDialogVisible] = useAtom(newFolderDialogVisibleAtom);
+  const [cwd] = useAtom(cwdAtom);
   const closeContextMenu = useCallback(() => {
     dispatchContextMenuState({ type: 'close' });
   }, []);
@@ -68,7 +70,10 @@ const GlobalContextMenu: React.FC = () => {
       closeContextMenu();
       return;
     }
-    queueFilesForUpload(files);
+    uploadFiles({
+      fileList: files,
+      directory: cwd,
+    });
     closeContextMenu();
   }
 

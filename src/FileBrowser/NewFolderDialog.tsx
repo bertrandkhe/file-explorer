@@ -9,14 +9,14 @@ export const newFolderDialogVisibleAtom = atom(false);
 
 const NewFolderDialog: React.FC = () => {
   const [cwd] = useAtom(cwdAtom);
-  const queryClient = useQueryClient();
   const [visible, setVisible] = useAtom(newFolderDialogVisibleAtom);
   const closeFolderDialog = () => setVisible(false);
+  const invalidateQueries = fileBrowser.useInvalidateQueries();
 
   const createFolderMutation = fileBrowser.useMutation(['mkdir'], {
     onSuccess() {
-      queryClient.invalidateQueries([fileBrowser.getQueryKey('ls'), {
-        directory: cwd,
+      invalidateQueries(['ls', {
+        prefix: cwd.slice(1),
       }]);
       closeFolderDialog();
     }

@@ -1,7 +1,6 @@
 import React from 'react';
 import { css, IconButton, styled  } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { toggleUploadsManagerVisibilityAtom } from './UploadsManager';
 import { secondaryPanelContentAtom } from './FileBrowser.atoms';
 import { useAtom } from 'jotai';
 import clsx from 'clsx';
@@ -39,9 +38,7 @@ const Root = styled('nav')(() => css`
 `);
 
 const FileBrowserMainMenu: React.FC = () => {
-  const [, toggleUploadsManagerVisibility] = useAtom(toggleUploadsManagerVisibilityAtom);
   const [secondaryPanelContent, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
-  console.log(secondaryPanelContent);
   return (
     <Root>
       <ul className={clsx(classes.menu, classes.rightMenu)}>
@@ -64,8 +61,14 @@ const FileBrowserMainMenu: React.FC = () => {
         <li>
           <IconButton
             size="small"
+            disableRipple
+            className={clsx(classes.btn, {
+              [classes.btnActive]: secondaryPanelContent === 'uploads',
+            })}
             onClick={() => {
-              toggleUploadsManagerVisibility();
+              setSecondaryPanelContent(
+                secondaryPanelContent === 'uploads' ? '' : 'uploads', 
+              );
             }}
           >
             <UploadIcon />

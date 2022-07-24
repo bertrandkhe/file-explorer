@@ -1,5 +1,5 @@
 import React from 'react';
-import { UseQueryResult, useMutation, useQuery, UseQueryOptions, UseMutationResult, UseMutationOptions } from 'react-query';
+import { UseQueryResult, useMutation, useQuery, UseQueryOptions, UseMutationResult, UseMutationOptions, useQueryClient, QueryClient } from 'react-query';
 
 export interface Object {
   id: string,
@@ -43,8 +43,9 @@ export interface ObjectStorageAdapter {
   upload(args: {
     key: string,
     file: File,
-    onProgress?(ev: ProgressEvent): void
-  }): Promise<Object>
+    onProgress?: XMLHttpRequestUpload['onprogress'],
+    onReady?(xhr: XMLHttpRequest): void,
+  }): Promise<string>
 
   mkdir(args: {
     key: string,
@@ -71,6 +72,11 @@ export type Prefix<K extends string, T extends string> = `${K}${T}`;
 
 export interface ReactQueryHooks<QueryKeyPrefix extends string> {
   getQueryKey<Key extends QueryKey>(key: Key): Prefix<QueryKeyPrefix, Key>
+
+  useInvalidateQueries<
+    Key extends QueryKey,
+    QueryFn extends ObjectStorageAdapter[Key],
+  >(): (args: [key: Key, input: Partial<Parameters<QueryFn>[0]>]) => Promise<void>;
 
   useQuery<
     Key extends QueryKey,
@@ -111,9 +117,27 @@ export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
   prefix: QueryKeyPrefix
 }): ReactQueryHooks<QueryKeyPrefix> => {
   const { prefix } = options;
+  let queryClient = null as QueryClient | null;
+
+  const getQueryKey = <Key extends QueryKey>(key: Key): Prefix<QueryKeyPrefix, Key> => {
+    return `${prefix}${key}`;
+  };
+
+  const invalidateQueries: ReturnType<ReactQueryHooks<QueryKeyPrefix>['useInvalidateQueries']> = (args) => {
+    if (!queryClient) {
+      throw new Error('queryClient is not instantiated.');
+    }
+    return queryClient.invalidateQueries([
+      getQueryKey(args[0]),
+      args[1],
+    ]);
+  };
+
   return {
-    getQueryKey(key) {
-      return `${prefix}${key}`;
+    getQueryKey,
+    useInvalidateQueries() {
+      queryClient = useQueryClient();
+      return invalidateQueries;
     },
 
     useQuery(args, options) {

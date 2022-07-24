@@ -1,20 +1,14 @@
 import React from 'react';
-import { 
-  Operation, 
-  OperationStatus,
-  stopOperationAtom,
-  startOperationAtom,
-  closeOperationAtom,
-} from '../OperationsService';
-import { css, IconButton, styled, Typography, LinearProgress } from '@mui/material';
-import { grey, red  } from '@mui/material/colors';
+import { styled, css, LinearProgress, IconButton, ListItem, Typography } from '@mui/material'
+import { grey } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import StopIcon from '@mui/icons-material/Stop';
 import ReplayIcon from '@mui/icons-material/Replay';
 import clsx from 'clsx';
-import { useAtom } from 'jotai';
+import { UploadItem, useUploadControls, useUploadStatus } from '../UploadsService';
+import { useUploadProgress } from '../UploadsService/hooks';
 
-const PREFIX = 'OperationControl';
+const PREFIX = 'UploadItemControl';
 
 const classes = {
   root: `${PREFIX}-root`,
@@ -24,10 +18,9 @@ const classes = {
   label: `${PREFIX}-label`,
   actions: `${PREFIX}-actions`,
   filename: `${PREFIX}-filename`,
-  errorMsg: `${PREFIX}-errorMsg`,
 };
 
-const Root = styled('div')(() => css`
+const Root = styled(ListItem)(() => css`
   padding: 0.5rem 1rem 0.5rem 2rem;
   border-bottom: 1px solid ${grey[300]};
   flex-direction: column;
@@ -81,81 +74,74 @@ const Root = styled('div')(() => css`
 
   .${classes.status} {
     color:  ${grey[600]};
-    margin-top: 0.25rem;
-  }
-
-  .${classes.errorMsg} {
-    color: ${red[500]};
   }
 `);
 
-type OperationControlProps = {
+type UploadControlProps = {
   className?: string,
-  item: Operation,
+  item: UploadItem,
 };
 
-const OperationControl: React.FC<OperationControlProps> = (props) => {
+const UploadControl: React.FC<UploadControlProps> = (props) => {
   const {
     className,
     item,
   } = props;
-
-  const [, stop] = useAtom(stopOperationAtom);
-  const [, start] = useAtom(startOperationAtom);
-  const [, close] = useAtom(closeOperationAtom);
-
-  const { status } = item;
-  const isInProgress = status === OperationStatus.IN_PROGRESS;
-  const isDone = status === OperationStatus.DONE;
-  const isOnHold = status === OperationStatus.ON_HOLD;
-  const isStopped = status === OperationStatus.STOPPED;
-  const hasFailed = status === OperationStatus.FAILED;
-
+  const { 
+    isInProgress,
+    isDone,
+    isStopped,
+    isOnHold,
+  } = useUploadStatus(item);
+  const progress = useUploadProgress(item);
+  const { 
+    startUpload,
+    stopUpload,
+    closeUpload,
+  } = useUploadControls();
   return (
     <Root
-      className={clsx(classes.root, className)}
+     className={clsx(classes.root, className)}
     >
       <div className={classes.labelContainer}>
         <div className={classes.label}>
           <div className={classes.filename}>
-            {item.type === 'rename' && `Move ${item.source}`}
+            {item.file.name}
           </div>
-          {!isInProgress  && (
+          {!isInProgress && (
             <Typography
-              className={clsx(classes.status, { [classes.errorMsg]: hasFailed })}
+              className={classes.status}
               variant="caption"
-              component="div"
             >
               {isDone && 'Done'}
               {isStopped && 'Cancelled'}
-              {hasFailed && 'Operation failed'}
             </Typography>
           )}
         </div>
         <div className={classes.actions}>
-          {isOnHold && (
+          {isInProgress && (
             <IconButton
               onClick={() => {
-                stop(item);
+                stopUpload(item);
               }}
               size="small"
             >
               <StopIcon />
             </IconButton>
           )}
-          {(isStopped || hasFailed) && (
+          {isStopped && (
             <IconButton
               onClick={() => {
-                start(item);
+                startUpload(item);
               }}
               size="small"
             >
               <ReplayIcon />
             </IconButton>
           )}
-          {(isDone || isOnHold || isStopped || hasFailed) && (
+          {(isDone || isOnHold || isStopped) && (
             <IconButton
-              onClick={() => close(item)}
+              onClick={() => closeUpload(item)}
               size="small"
             >
               <CloseIcon />
@@ -165,11 +151,20 @@ const OperationControl: React.FC<OperationControlProps> = (props) => {
       </div>
       {isInProgress && (
         <div className={classes.progress}>
-          <LinearProgress />
+          {progress.loaded > 0 && (
+            <LinearProgress 
+              variant="determinate" 
+              value={Math.ceil((progress.loaded * 100) / progress.total)} 
+              // value={50}
+            />
+          )}
+          {!progress.loaded && (
+            <LinearProgress variant="indeterminate" />
+          )}
         </div>
       )}
     </Root>
-  )
+  );
 };
 
-export default OperationControl;
+export default UploadControl;

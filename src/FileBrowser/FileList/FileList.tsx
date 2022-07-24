@@ -7,7 +7,7 @@ import {
   Paper,
   styled,
 } from '@mui/material';
-import React, { useRef } from 'react';
+import React, { useMemo, useRef } from 'react';
 import { atom, useAtom } from 'jotai';
 import { atomWithReducer  } from 'jotai/utils';
 import { cwdAtom } from '../FileBrowser.atoms';
@@ -16,7 +16,8 @@ import ObjectListItem from './ObjectListItem';
 import FolderListItem from './FolderListItem';
 import { blue } from '@mui/material/colors';
 import ItemIcon from './ItemIcon';
-import { NewOperation, queueOperationsAtom  } from '../OperationsPanel/OperationsPanel';
+import { NewOperation, queueOperationsAtom } from '../OperationsService';
+import { secondaryPanelContentAtom } from '../FileBrowser.atoms';
 
 
 const PREFIX = 'FileList';
@@ -209,21 +210,25 @@ const onItemClickAtom = atom(
 
 const FileList: React.FC = () => {
   const [cwd, setCwd] = useAtom(cwdAtom);
+  const prefix = useMemo(() => {
+    return cwd.slice(1);
+  }, [cwd]);
   const [, setItemList] = useAtom(setItemListAtom);
   const [selectedItemList, dispatchToSelectedItemList] = useAtom(selectedItemListAtom);
   const [, onItemClick] = useAtom(onItemClickAtom);
   const [, queueOperations] = useAtom(queueOperationsAtom); 
+  const [, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
   const dragImgElemRef = useRef<HTMLDivElement | null>(null);
-  const cwdParts = cwd.split('/').filter(f => f.length > 0);
+  const cwdParts = prefix.split('/').filter(f => f.length > 0);
   const listObjectsQuery = fileBrowser.useQuery(['ls', {
-    prefix: cwd,
+    prefix,
   }], {
     onSuccess({ folders = [], objects = [] }) {
       setItemList({ folders, objects });
     }
   });
   const listObjectsResult = listObjectsQuery.data;
-  const { folders = [], objects = [] } = listObjectsResult || {};
+  const { folders = [], objects = [], count = 0 } = listObjectsResult || {};
 
   const navigate = (directory: string) => {
     dispatchToSelectedItemList({ type: 'reset' });
@@ -250,6 +255,7 @@ const FileList: React.FC = () => {
       }
     });
     queueOperations(operations);
+    setSecondaryPanelContent('operations');
   }
 
   return (
@@ -325,6 +331,9 @@ const FileList: React.FC = () => {
           onDragStart={handleDragStart}
          />
       ))}
+      {count === 0 && listObjectsQuery.isLoading && (
+        <div>Loading</div>
+      )}
     </Root>
   );
 };

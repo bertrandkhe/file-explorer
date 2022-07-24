@@ -2,7 +2,7 @@ import { atom } from 'jotai';
 
 export const cwdAtom = atom('/');
 
-export const secondaryPanelContentAtom = atom<'operations' | ''>('');
+export const secondaryPanelContentAtom = atom<'operations' | 'uploads' | ''>('');
 
 export const secondaryPanelIsVisibleAtom = atom(
   false,

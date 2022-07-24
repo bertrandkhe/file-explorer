@@ -2,15 +2,17 @@ import React from 'react';
 import Breadcrumbs from './Breadcrumbs';
 import GlobalContextMenu from './GlobalContextMenu';
 import NewFolderDialog from './NewFolderDialog';
-import UploadsManager from './UploadsManager';
 import FileBrowserMainMenu from './FileBrowserMainMenu';
 import FileList from './FileList';
-import { css, styled, Drawer } from '@mui/material';
+import { css, styled } from '@mui/material';
 import { secondaryPanelContentAtom } from './FileBrowser.atoms';
 import { useAtom } from 'jotai';
 import { FileBrowserContext, ObjectStorageAdapter } from './fileBrowser';
 import clsx from 'clsx';
 import OperationsPanel from './OperationsPanel';
+import OperationsService from './OperationsService';
+import UploadsPanel from './UploadsPanel';
+import UploadsService from './UploadsService';
 
 const PREFIX = 'FileBrowser';
 
@@ -26,21 +28,22 @@ const Root = styled('div')(() => css`
   position: relative;
   height: 100%;
   width: 100%;
+  display: flex;
   .${classes.main} {
-    position: absolute;
     height: 100%;
     width: 100%;
     overflow: auto;
     transition: width 0.2s;
-    padding: 1rem 2rem;
+    position: relative;
+    padding: 2rem;
   }
 
   .${classes.secondaryPanel} {
-    right: 0;
+    height: 100%;
     width: 0;
     transition: width 0.2s;
     background: white;
-    z-index: 1;
+    position: relative;
   }
 
 
@@ -48,7 +51,7 @@ const Root = styled('div')(() => css`
     .${classes.main} {
       width: calc(100% - 350px);
     }
-    .${classes.secondaryPanelPaper} {
+    .${classes.secondaryPanel} {
       width: 350px;
     }
   }
@@ -65,6 +68,8 @@ export const FileBrowser: React.FC<FileBrowserProps> = (props) => {
   const secondaryPanelIsVisible = secondaryPanelContent.length > 0;
   return (
     <FileBrowserContext.Provider value={{ adapter }}>
+      <OperationsService />
+      <UploadsService />
       <Root 
         className={clsx(
           classes.root,
@@ -79,21 +84,15 @@ export const FileBrowser: React.FC<FileBrowserProps> = (props) => {
           <FileBrowserMainMenu />
           <Breadcrumbs />
           <FileList />
-          <UploadsManager />
         </div>
-        <Drawer 
-          className={classes.secondaryPanel}
-          open={secondaryPanelIsVisible}
-          anchor="right"
-          variant="persistent"
-          PaperProps={{
-            className: classes.secondaryPanelPaper
-          }}
-        >
+        <div className={classes.secondaryPanel}>
           {secondaryPanelContent === 'operations' && (
             <OperationsPanel />
           )}
-        </Drawer>
+          {secondaryPanelContent === 'uploads' && (
+            <UploadsPanel />
+          )}
+        </div>
       </Root>
     </FileBrowserContext.Provider>
   );
