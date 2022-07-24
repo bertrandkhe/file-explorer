@@ -1,4 +1,4 @@
-import { css, Divider, ListItemIcon, Menu, MenuItem, MenuProps, styled } from '@mui/material';
+import { css, Divider, ListItemIcon, MenuItem, MenuProps, styled } from '@mui/material';
 import CreateNewFolderIcon from '@mui/icons-material/CreateNewFolder';
 import DriveFolderUploadIcon from '@mui/icons-material/DriveFolderUpload';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
@@ -8,6 +8,7 @@ import { atomWithReducer } from 'jotai/utils';
 import { newFolderDialogVisibleAtom } from './NewFolderDialog';
 import { useUploadControls } from './UploadsService';
 import { cwdAtom } from './FileBrowser.atoms';
+import ContextMenu from './utils/ContextMenu';
 
 const PREFIX = 'GlobalContextMenu';
 
@@ -15,7 +16,7 @@ const classes = {
   inputFile: `${PREFIX}-inputFile`,
 };
 
-const Root = styled(Menu)(() => css`
+const Root = styled(ContextMenu)(() => css`
   .${classes.inputFile} {
     display: none;
   }

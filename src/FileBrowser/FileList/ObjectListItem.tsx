@@ -17,6 +17,7 @@ import ItemIcon from './ItemIcon';
 export type ListItemProps<Data> = {
   data: Data,
   onClick?(args: { ev: React.MouseEvent, data: Data }): void,
+  onContextMenu?(args: { ev: React.MouseEvent, data: Data }): void,
   onDoubleClick?(item: Data): void,
   classes?: {
     root?: string,
@@ -26,6 +27,7 @@ export type ListItemProps<Data> = {
   selected?: boolean,
   onDragStart?(args: { ev: React.DragEvent, data: Data }): void,
   onDrag?(ev: React.DragEvent): void,
+  index: number,
 };
 
 type ObjectListItemProps = ListItemProps<Object>;
@@ -53,13 +55,15 @@ const getFileType = (ext: string): string => {
 
 const PREFIX = 'ObjectListItem';
 
-const classes = {
+export const classes = {
   root: `${PREFIX}-root`,
   label: `${PREFIX}-label`,
   lastModified: `${PREFIX}-lastModified`,
   size: `${PREFIX}-size`,
   lastCol: `${PREFIX}-lastCol`,
   selected: `${PREFIX}-selected`,
+  hovered: `${PREFIX}-hovered`,
+  listItemButton: `${PREFIX}-listItemButton`,
 };
 
 const Root = styled(ListItem)(() => css`
@@ -80,9 +84,11 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
     classes: propsClasses = {},
     onClick,
     onDoubleClick,
+    onContextMenu,
     onDrag,
     onDragStart,
     selected,
+    index,
   } = props;
   const { name, lastModified, size } = data;
   const extension = name.split('.').pop() || '';
@@ -90,6 +96,8 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
   return (
     <Root 
       className={clsx(classes.root, propsClasses.root)}
+      data-index={index}
+      data-type={data.type}
       onDrag={onDrag}
       onDragStart={(ev) => {
         if (onDragStart) {
@@ -99,7 +107,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
       draggable
     >
       <ListItemButton
-        className={clsx({
+        className={clsx(classes.listItemButton, {
           [propsClasses.selected || classes.selected]: selected,
         })}
         onDoubleClick={() => {
@@ -112,9 +120,10 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
             onClick({ ev, data });
           }
         }}
-        onContextMenu={(e) => {
-          e.preventDefault();
-          console.log(e);
+        onContextMenu={(ev) => {
+          if (onContextMenu) {
+            onContextMenu({ ev, data });
+          }
         }}
         disableRipple
       >

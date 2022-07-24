@@ -18,6 +18,7 @@ const classes = {
 const Root = styled('nav')(() => css`
   display: flex;
   .${classes.menu} {
+    margin: 0;
     display: flex;
     list-style: none;
     padding-left: 0;

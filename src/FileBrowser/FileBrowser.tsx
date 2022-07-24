@@ -5,7 +5,7 @@ import NewFolderDialog from './NewFolderDialog';
 import FileBrowserMainMenu from './FileBrowserMainMenu';
 import FileList from './FileList';
 import { css, styled } from '@mui/material';
-import { secondaryPanelContentAtom } from './FileBrowser.atoms';
+import { secondaryPanelContentAtom, closeSecondaryPanelAtom } from './FileBrowser.atoms';
 import { useAtom } from 'jotai';
 import { FileBrowserContext, ObjectStorageAdapter } from './fileBrowser';
 import clsx from 'clsx';
@@ -19,6 +19,8 @@ const PREFIX = 'FileBrowser';
 const classes = {
   root: `${PREFIX}-root`,
   main: `${PREFIX}-main`,
+  mainGrid: `${PREFIX}-mainGrid`,
+  fileList: `${PREFIX}-fileList`,
   secondaryPanel: `${PREFIX}-secondaryPanel`,
   secondaryPanelPaper: `${PREFIX}-secondaryPanelPaper`,
   secondaryPanelVisible: `${PREFIX}-secondaryPanelVisible`,
@@ -35,7 +37,19 @@ const Root = styled('div')(() => css`
     overflow: auto;
     transition: width 0.2s;
     position: relative;
-    padding: 2rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .${classes.mainGrid} {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template: 2.5rem 1fr / 1fr 1fr;
+    grid-row-gap: 0.25rem;
+  }
+
+  .${classes.fileList} {
+    grid-column: 1 / span 2;
   }
 
   .${classes.secondaryPanel} {
@@ -65,6 +79,7 @@ type FileBrowserProps = {
 export const FileBrowser: React.FC<FileBrowserProps> = (props) => {
   const { adapter } = props;
   const [secondaryPanelContent] = useAtom(secondaryPanelContentAtom);
+  const [, closeSecondaryPanel] = useAtom(closeSecondaryPanelAtom);
   const secondaryPanelIsVisible = secondaryPanelContent.length > 0;
   return (
     <FileBrowserContext.Provider value={{ adapter }}>
@@ -78,19 +93,21 @@ export const FileBrowser: React.FC<FileBrowserProps> = (props) => {
           },
         )}
       >
+        <NewFolderDialog />
+        <GlobalContextMenu />
         <div className={classes.main}>
-          <GlobalContextMenu />
-          <NewFolderDialog />
-          <FileBrowserMainMenu />
-          <Breadcrumbs />
-          <FileList />
+          <div className={classes.mainGrid}>
+            <Breadcrumbs />
+            <FileBrowserMainMenu />
+            <FileList className={classes.fileList} />
+          </div>
         </div>
         <div className={classes.secondaryPanel}>
           {secondaryPanelContent === 'operations' && (
-            <OperationsPanel />
+            <OperationsPanel onClose={closeSecondaryPanel} />
           )}
           {secondaryPanelContent === 'uploads' && (
-            <UploadsPanel />
+            <UploadsPanel onClose={closeSecondaryPanel} />
           )}
         </div>
       </Root>

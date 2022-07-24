@@ -11,3 +11,10 @@ export const secondaryPanelIsVisibleAtom = atom(
     set(secondaryPanelIsVisibleAtom, !visible);
   }
 );
+
+export const closeSecondaryPanelAtom = atom(
+  null,
+  (get, set) => {
+    set(secondaryPanelContentAtom, '');
+  },
+);

@@ -18,9 +18,10 @@ export type FolderListItemProps = ListItemProps<Folder> & {
 
 const PREFIX = 'FolderListItem';
 
-const classes = {
+export const classes = {
   root: `${PREFIX}-root`,
   label: `${PREFIX}-label`,
+  listItemButton: `${PREFIX}-listItemButton`,
   selected: `${PREFIX}-selected`,
 };
 
@@ -36,11 +37,13 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
     data, 
     onClick,
     onDoubleClick,
+    onContextMenu,
     classes: propsClasses = {},
     selected,
     onDrag,
     onDragStart,
     onDrop,
+    index,
   } = props;
 
   const [state, setState] = useState({
@@ -48,8 +51,15 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
   });
 
   return (
-    <Root 
+    <Root
+      data-index={index}
+      data-type={data.type} 
       className={clsx(classes.root, propsClasses.root)}
+      onContextMenu={(ev) => {
+        if (onContextMenu) {
+          onContextMenu({ ev, data });
+        }
+      }}
       onDrag={onDrag}
       onDragStart={(ev) => {
         if (onDragStart) {
@@ -80,7 +90,7 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
       draggable
     >
       <ListItemButton 
-        className={clsx({
+        className={clsx(classes.listItemButton, {
           [propsClasses.selected || classes.selected]: selected || state.draggedOver,
         })}
         onDoubleClick={() => {

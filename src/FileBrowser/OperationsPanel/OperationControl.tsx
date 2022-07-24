@@ -28,25 +28,30 @@ const classes = {
 };
 
 const Root = styled('div')(() => css`
-  padding: 0.5rem 1rem 0.5rem 2rem;
+  padding: 0.6rem 1rem 0.5rem 1.25rem;
   border-bottom: 1px solid ${grey[300]};
-  flex-direction: column;
-  align-items: flex-start;
-
-  :last-of-type {
-    border-bottom: none;
-  }
+  display: grid;
+  grid-template:
+    "label actions" 2.25rem
+    "progress progress" 4px
+    / 1fr 4.5rem
+  ;
 
   .${classes.progress} {
-    width: 100%;
-    padding-right: 2.5rem;
+    grid-area: progress;
   }
 
   .${classes.label} {
-    width: 100%;
-    overflow: hidden;
-    line-height: 1.1;
-    font-size: 0.9em;
+    font-size: 0.8em;
+  }
+
+  .${classes.status} {
+    font-size: 0.65rem;
+    color:  ${grey[600]};
+  }
+
+  .${classes.errorMsg} {
+    color: ${red[500]};
   }
 
   .${classes.filename} {
@@ -55,37 +60,17 @@ const Root = styled('div')(() => css`
     overflow: hidden;
   }
 
-  .${classes.labelContainer} {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 90px;
-    align-items: center;
-
-    .${classes.actions} {
-      visibility: hidden;
-    }
-
-    &:hover,
-    &:focus {
-      .${classes.actions} {
-        visibility: visible;
-      }
-    }
-  }
-  
   .${classes.actions} {
-    margin-left: 0.5rem;
-    display: flex;
-    justify-content: flex-end;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    visibility: hidden;
   }
 
-  .${classes.status} {
-    color:  ${grey[600]};
-    margin-top: 0.25rem;
-  }
-
-  .${classes.errorMsg} {
-    color: ${red[500]};
+  &:hover,
+  &:focus {
+    .${classes.actions} {
+      visibility: visible;
+    }
   }
 `);
 
@@ -121,53 +106,47 @@ const OperationControl: React.FC<OperationControlProps> = (props) => {
             {item.type === 'rename' && `Move ${item.source}`}
           </div>
           {!isInProgress  && (
-            <Typography
+            <div
               className={clsx(classes.status, { [classes.errorMsg]: hasFailed })}
-              variant="caption"
-              component="div"
             >
               {isDone && 'Done'}
               {isStopped && 'Cancelled'}
               {hasFailed && 'Operation failed'}
-            </Typography>
-          )}
-        </div>
-        <div className={classes.actions}>
-          {isOnHold && (
-            <IconButton
-              onClick={() => {
-                stop(item);
-              }}
-              size="small"
-            >
-              <StopIcon />
-            </IconButton>
-          )}
-          {(isStopped || hasFailed) && (
-            <IconButton
-              onClick={() => {
-                start(item);
-              }}
-              size="small"
-            >
-              <ReplayIcon />
-            </IconButton>
-          )}
-          {(isDone || isOnHold || isStopped || hasFailed) && (
-            <IconButton
-              onClick={() => close(item)}
-              size="small"
-            >
-              <CloseIcon />
-            </IconButton>
+            </div>
           )}
         </div>
       </div>
-      {isInProgress && (
-        <div className={classes.progress}>
-          <LinearProgress />
-        </div>
-      )}
+      <div className={classes.actions}>
+        {isOnHold && (
+          <IconButton
+            onClick={() => {
+              stop(item);
+            }}
+            size="small"
+          >
+            <StopIcon />
+          </IconButton>
+        )}
+        {(isStopped || hasFailed) && (
+          <IconButton
+            onClick={() => {
+              start(item);
+            }}
+          >
+            <ReplayIcon fontSize="small" />
+          </IconButton>
+        )}
+        {(isDone || isOnHold || isStopped || hasFailed) && (
+          <IconButton
+            onClick={() => close(item)}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        )}
+      </div>
+      <div className={classes.progress}>
+        {isInProgress && <LinearProgress />}
+      </div>
     </Root>
   )
 };

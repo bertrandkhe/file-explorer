@@ -7,18 +7,26 @@ import {
   Paper,
   styled,
 } from '@mui/material';
+import clsx from 'clsx';
 import React, { useMemo, useRef } from 'react';
-import { atom, useAtom } from 'jotai';
-import { atomWithReducer  } from 'jotai/utils';
+import { useAtom } from 'jotai';
 import { cwdAtom } from '../FileBrowser.atoms';
-import { fileBrowser, Object, Folder } from '../fileBrowser';
+import { fileBrowser, Folder } from '../fileBrowser';
 import ObjectListItem from './ObjectListItem';
 import FolderListItem from './FolderListItem';
+import ListItemContextMenu from './ListItemContextMenu';
 import { blue } from '@mui/material/colors';
 import ItemIcon from './ItemIcon';
 import { NewOperation, queueOperationsAtom } from '../OperationsService';
 import { secondaryPanelContentAtom } from '../FileBrowser.atoms';
-
+import { 
+  setItemListAtom, 
+  selectedItemListAtom, 
+  onContextMenuAtom,
+  onItemClickAtom,
+  contextMenuAnchorPositionAtom,
+  ItemData,
+} from './atoms';
 
 const PREFIX = 'FileList';
 
@@ -27,6 +35,7 @@ const classes = {
   col: `${PREFIX}-col`,
   row: `${PREFIX}-row`,
   selected: `${PREFIX}-selected`,
+  hovered: `${PREFIX}-hovered`,
   dragImageContainer: `${PREFIX}-dragImageContainer`,
   dragImage: `${PREFIX}-dragImage`,
   dragImageIcon: `${PREFIX}-dragImageIcon`,
@@ -34,15 +43,24 @@ const classes = {
 };
 
 const Root = styled(List)(() => css`
+  height: 100%;
+  overflow: auto;
   .${classes.row} {
     padding: 0;
-  }
-  .${classes.selected} {
-    background-color: ${blue[50]};
-    &:hover {
+    &.hovered {
+      background-color: rgba(0, 0, 0, 0.04);
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+      }
+    }
+    .${classes.selected} {
       background-color: ${blue[50]};
+      &:hover {
+        background-color: ${blue[50]};
+      }
     }
   }
+
   .${classes.col} {
     text-align: center;
     &:first-of-type {
@@ -94,121 +112,12 @@ const Root = styled(List)(() => css`
   }
 `);
 
-type ItemData = (Folder | Object);
-
-type ItemList = ItemData[];
-
-const folderListAtom = atom<Folder[]>([]);
-const objectListAtom = atom<Object[]>([]);
-const itemListAtom = atom<ItemList>([]);
-
-const setItemListAtom = atom(
-  null,
-  (get, set, value: { folders: Folder[], objects: Object[] }) => {
-    set(folderListAtom, value.folders);
-    set(objectListAtom, value.objects);
-    set(itemListAtom, [...value.folders, ...value.objects]);
-  }
-);
-
-type SelectItemAction = {
-  type: 'single',
-  item: ItemData
-} | {
-  type: 'add',
-  items: ItemData[],
-} | {
-  type: 'remove',
-  item: ItemData,
-} | {
-  type: 'reset',
-} | {
-  type: 'set',
-  items: ItemData[],
+type FileListProps = {
+  className?: string,
 };
 
-const selectedItemListAtom = atomWithReducer<ItemList, SelectItemAction>(
-  [], 
-  (value, action) => {
-    if (!action) {
-      return value;
-    }
-    switch (action.type) {
-      case 'single':
-        return [action.item];
-
-      case 'add': {
-        const newValue = action.items.filter((item) => {
-          return !value.some((selectedItem) => selectedItem.id === item.id);
-        });
-        return [...value, ...newValue];
-      }
-
-      case 'set':
-        return [...action.items];
-
-      case 'remove': 
-        return value.filter((item) => action.item.id !== item.id);
-
-      case 'reset':
-        return [];
-    }
-    throw new Error('Unsupported action type');
-  },
-);
-
-const selectionAnchorAtom = atom<ItemData | null>(null);
-
-const onItemClickAtom = atom(
-  null,
-  (get, set, update: { ev: React.MouseEvent, data: ItemData }) => {
-    const { ev, data } = update;
-    const selectedItemList = get(selectedItemListAtom);
-    const itemList = get(itemListAtom);
-    const isSelected = (data: ItemData) => selectedItemList.some((item) => item.id === data.id);
-    const getItemIndex = (data: ItemData) => itemList.findIndex((item) => item.id === data.id);
-    if (ev.shiftKey) {
-      const selectionAnchor = get(selectionAnchorAtom);
-      if (!selectionAnchor) {
-        set(selectedItemListAtom, { type: 'add', items: [data] });
-        set(selectionAnchorAtom, data);
-        return;
-      }
-      const selectionAnchorIndex = getItemIndex(selectionAnchor);
-      const selectedItemIndex = getItemIndex(data);
-      const range = [selectedItemIndex, selectionAnchorIndex]
-        .sort((a, b) => a > b ? 1 : -1);
-      const selection = itemList.slice(range[0], range[1] + 1);
-      if (ev.ctrlKey) {
-        set(selectedItemListAtom, { type: 'add', items: selection });
-        return;
-      }
-      set(selectedItemListAtom, { type: 'set', items: selection });
-      return;
-    }
-    if (ev.ctrlKey) {
-      if (isSelected(data)) {
-        set(selectedItemListAtom, { type: 'remove', item: data });
-        if (selectedItemList.length - 1 === 0) {
-          set(selectionAnchorAtom, null);
-        }
-      } else {
-        set(selectedItemListAtom, { type: 'add', items: [data] });
-        set(selectionAnchorAtom, data);
-      }
-      return;
-    }
-
-    set(selectedItemListAtom, {
-      type: 'single',
-      item: data,
-    });
-    set(selectionAnchorAtom, data);
-  }
-)
-
-
-const FileList: React.FC = () => {
+const FileList: React.FC<FileListProps> = (props) => {
+  const { className } = props; 
   const [cwd, setCwd] = useAtom(cwdAtom);
   const prefix = useMemo(() => {
     return cwd.slice(1);
@@ -216,8 +125,10 @@ const FileList: React.FC = () => {
   const [, setItemList] = useAtom(setItemListAtom);
   const [selectedItemList, dispatchToSelectedItemList] = useAtom(selectedItemListAtom);
   const [, onItemClick] = useAtom(onItemClickAtom);
+  const [, onContextMenu] = useAtom(onContextMenuAtom);
   const [, queueOperations] = useAtom(queueOperationsAtom); 
   const [, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
+  const [contextMenuAnchorPosition, setContextMenuAnchorPosition] = useAtom(contextMenuAnchorPositionAtom);
   const dragImgElemRef = useRef<HTMLDivElement | null>(null);
   const cwdParts = prefix.split('/').filter(f => f.length > 0);
   const listObjectsQuery = fileBrowser.useQuery(['ls', {
@@ -259,7 +170,13 @@ const FileList: React.FC = () => {
   }
 
   return (
-    <Root className={classes.root} dense>
+    <Root className={clsx(classes.root, className)} dense>
+      <ListItemContextMenu 
+        anchorReference="anchorPosition"
+        anchorPosition={contextMenuAnchorPosition}
+        open={Boolean(contextMenuAnchorPosition)}
+        onClose={() => setContextMenuAnchorPosition()}
+      />
       <div
         className={classes.dragImageContainer} 
         ref={dragImgElemRef}
@@ -301,9 +218,10 @@ const FileList: React.FC = () => {
           </ListItemText>
         </ListItemButton>
       </ListItem>
-      {folders.map((folder) => (
+      {folders.map((folder, i) => (
         <FolderListItem
           key={folder.prefix}
+          index={i}
           onDoubleClick={() => navigate(`/${folder.prefix}`)}
           data={folder}
           classes={{
@@ -313,13 +231,15 @@ const FileList: React.FC = () => {
           }}
           selected={selectedItemList.includes(folder)}
           onClick={onItemClick}
+          onContextMenu={onContextMenu}
           onDragStart={handleDragStart}
           onDrop={handleDrop}
         />
       ))}
-      {objects.map((obj) => (
+      {objects.map((obj, i) => (
         <ObjectListItem 
-          data={obj} 
+          data={obj}
+          index={i}
           key={obj.key}
           classes={{
             root: classes.row,
@@ -329,6 +249,7 @@ const FileList: React.FC = () => {
           selected={selectedItemList.includes(obj)}
           onClick={onItemClick}
           onDragStart={handleDragStart}
+          onContextMenu={onContextMenu}
          />
       ))}
       {count === 0 && listObjectsQuery.isLoading && (
