@@ -6,10 +6,17 @@ import JavascriptIcon from '@mui/icons-material/Javascript';
 import FolderIcon from '@mui/icons-material/Folder';
 import { blue, red, yellow } from '@mui/material/colors';
 import { Folder, Object } from '../fileBrowser';
+import { ViewMode } from './atoms';
 
-const ItemIcon: React.FC<{ item: Folder | Object, className?: string, style?: CSSProperties }> = (props) => {
-  const { item, ...otherProps } = props;
-  if (item.type === 'folder') {
+const ItemIcon: React.FC<{ 
+  item: Folder | Object, 
+  className?: string,
+  viewMode?: ViewMode,
+  style?: CSSProperties,
+}> = (props) => {
+  const { item, viewMode, ...otherProps } = props;
+  const isFolder = item.type === 'folder';
+  if (isFolder) {
     return <FolderIcon {...otherProps} sx={{ color: yellow[600] }} />;
   }
   const { name } = item;

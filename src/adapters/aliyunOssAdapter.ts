@@ -56,10 +56,16 @@ const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
   async rename(args: { source: string; destination: string; }): Promise<void> {
     await client.mutation('aliyun_oss.rename', args);
   },
-  async objectMeta(args: { key: string; }): Promise<ObjectMeta> {
+  async imagePreviewUrl(args: Parameters<ObjectStorageAdapter['imagePreviewUrl']>[0]) {
+    return client.query('aliyun_oss.imagePreviewUrl', args);
+  },
+  async objectUrl(args: Parameters<ObjectStorageAdapter['objectUrl']>[0]): Promise<string> {
+    return client.query('aliyun_oss.objectUrl', args);
+  },
+  async objectMeta(args: Parameters<ObjectStorageAdapter['objectMeta']>[0]): Promise<ObjectMeta> {
     return client.query('aliyun_oss.objectMeta', args);
   },
-  async delete(args: { key: string; }): Promise<void> {
+  async delete(args: Parameters<ObjectStorageAdapter['delete']>[0]): Promise<void> {
     throw new Error("Function not implemented.");
   }
 });

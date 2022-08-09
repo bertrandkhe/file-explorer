@@ -1,9 +1,9 @@
 import React from 'react';
 import Breadcrumbs from './Breadcrumbs';
-import GlobalContextMenu from './GlobalContextMenu';
+import GlobalContextMenu, { useOpenContextMenu } from './GlobalContextMenu';
 import NewFolderDialog from './NewFolderDialog';
 import FileBrowserMainMenu from './FileBrowserMainMenu';
-import FileList from './FileList';
+import FileList, { clearSelectionAtom } from './FileList';
 import { css, styled } from '@mui/material';
 import { secondaryPanelContentAtom, closeSecondaryPanelAtom } from './FileBrowser.atoms';
 import { useAtom } from 'jotai';
@@ -80,9 +80,13 @@ export const FileBrowser: React.FC<FileBrowserProps> = (props) => {
   const { adapter } = props;
   const [secondaryPanelContent] = useAtom(secondaryPanelContentAtom);
   const [, closeSecondaryPanel] = useAtom(closeSecondaryPanelAtom);
+  const [, clearSelection] = useAtom(clearSelectionAtom)
   const secondaryPanelIsVisible = secondaryPanelContent.length > 0;
+  const openContextMenu = useOpenContextMenu();
   return (
-    <FileBrowserContext.Provider value={{ adapter }}>
+    <FileBrowserContext.Provider 
+      value={{ adapter }}
+    >
       <OperationsService />
       <UploadsService />
       <Root 
@@ -95,7 +99,29 @@ export const FileBrowser: React.FC<FileBrowserProps> = (props) => {
       >
         <NewFolderDialog />
         <GlobalContextMenu />
-        <div className={classes.main}>
+        <div 
+          className={classes.main}
+          onClick={(ev) => {
+            if (ev.defaultPrevented) {
+              return;
+            }
+            clearSelection();
+          }}
+          onContextMenu={(ev) => {
+            if (ev.defaultPrevented) {
+              return;
+            }
+            ev.preventDefault();
+            const anchorPosition = {
+              left: ev.clientX,
+              top: ev.clientY,
+            };
+            openContextMenu({
+              anchorReference: 'anchorPosition',
+              anchorPosition,
+            });
+          }}
+        >
           <div className={classes.mainGrid}>
             <Breadcrumbs />
             <FileBrowserMainMenu />

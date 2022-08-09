@@ -10,9 +10,10 @@ import {
 import filesize from 'filesize';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
-import { Object } from '../fileBrowser';
+import { fileBrowser, Object } from '../fileBrowser';
 import { grey } from '@mui/material/colors';
-import ItemIcon from './ItemIcon'; 
+import ItemIcon from './ItemIcon';
+import { ViewMode } from './atoms';
 
 export type ListItemProps<Data> = {
   data: Data,
@@ -23,11 +24,16 @@ export type ListItemProps<Data> = {
     root?: string,
     col?: string,
     selected?: string,
+    listItemButton?: string,
+    listItemLabel?: string,
+    listItemIcon?: string,
+    previewImage?: string,
   },
   selected?: boolean,
   onDragStart?(args: { ev: React.DragEvent, data: Data }): void,
   onDrag?(ev: React.DragEvent): void,
   index: number,
+  viewMode: ViewMode,
 };
 
 type ObjectListItemProps = ListItemProps<Object>;
@@ -67,10 +73,6 @@ export const classes = {
 };
 
 const Root = styled(ListItem)(() => css`
-  .${classes.label} {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-  }
   .${classes.lastModified} {
     color: ${grey[600]};
   }
@@ -89,10 +91,26 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
     onDragStart,
     selected,
     index,
+    viewMode,
   } = props;
-  const { name, lastModified, size } = data;
+  const { name, lastModified, size, key } = data;
   const extension = name.split('.').pop() || '';
   const [focused, setFocused] = useState(false);
+
+  const isGridViewMode = viewMode === 'grid';
+  const isImage = getFileType(extension) === 'Image';
+  const expires = dayjs().add(1, 'hour').startOf('hour');
+  const now = dayjs();
+  const objectUrlQuery = fileBrowser.useQuery(['imagePreviewUrl', {
+    key,
+    expires: expires.unix(),
+    width: 144,
+  }], {
+    enabled: isImage && isGridViewMode,
+    staleTime: expires.diff(now, 'seconds'),
+  });
+  const objectUrl = objectUrlQuery.data;
+
   return (
     <Root 
       className={clsx(classes.root, propsClasses.root)}
@@ -107,7 +125,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
       draggable
     >
       <ListItemButton
-        className={clsx(classes.listItemButton, {
+        className={clsx(classes.listItemButton, propsClasses.listItemButton, {
           [propsClasses.selected || classes.selected]: selected,
         })}
         onDoubleClick={() => {
@@ -127,23 +145,36 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
         }}
         disableRipple
       >
-        <ListItemIcon>
-          <ItemIcon item={data} />
+        <ListItemIcon className={propsClasses.listItemIcon}>
+          {isImage && isGridViewMode && objectUrl ? (
+            <img 
+              src={objectUrl} 
+              title={name} 
+              loading="lazy" 
+              className={propsClasses.previewImage}
+            />
+          ) : (
+            <ItemIcon item={data} viewMode={viewMode} />
+          )}
         </ListItemIcon>
         <ListItemText>
-          <div className={classes.label}>
+          <div className={clsx(classes.label, propsClasses.listItemLabel)}>
             <div className={propsClasses.col}>
               {name}
             </div>
-            <div className={clsx(classes.lastModified, propsClasses.col)}>
-              {dayjs(lastModified).format('MMM D, YYYY h:mm A	')}
-            </div>
-            <div className={clsx(classes.size, propsClasses.col)}>
-              {humanSize(size)}
-            </div> 
-            <div className={propsClasses.col}>
-              {getFileType(extension)}
-            </div>
+            {viewMode === 'list' && (
+              <>
+                <div className={clsx(classes.lastModified, propsClasses.col)}>
+                  {dayjs(lastModified).format('MMM D, YYYY h:mm A	')}
+                </div>
+                <div className={clsx(classes.size, propsClasses.col)}>
+                  {humanSize(size)}
+                </div> 
+                <div className={propsClasses.col}>
+                  {getFileType(extension)}
+                </div>
+              </>
+            )}
           </div>
         </ListItemText>
       </ListItemButton>

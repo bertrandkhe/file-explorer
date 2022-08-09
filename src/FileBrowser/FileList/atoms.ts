@@ -11,6 +11,10 @@ export const folderListAtom = atom<Folder[]>([]);
 export const objectListAtom = atom<Object[]>([]);
 export const itemListAtom = atom<ItemList>([]);
 
+export type ViewMode = 'list' | 'grid';
+export const viewModeAtom = atom<ViewMode>('list');
+
+
 export const setItemListAtom = atom(
   null,
   (get, set, value: { folders: Folder[], objects: Object[] }) => {
@@ -66,6 +70,25 @@ export const selectedItemListAtom = atomWithReducer<ItemList, SelectItemAction>(
   },
 );
 
+export const clearSelectionAtom = atom(
+  null,
+  (get, set) => {
+    set(selectedItemListAtom, {
+      type: 'reset',
+    });
+  }
+);
+
+export const clipboardAtom = atom<ItemList>([]);
+
+export const copySelectionToClipboardAtom = atom(
+  null,
+  (get, set) => {
+    const selectedItemList = get(selectedItemListAtom);
+    set(clipboardAtom, selectedItemList);
+  },
+);
+
 
 const selectionAnchorAtom = atom<ItemData | null>(null);
 
@@ -73,6 +96,7 @@ export const onItemClickAtom = atom(
   null,
   (get, set, update: { ev: React.MouseEvent, data: ItemData }) => {
     const { ev, data } = update;
+    ev.preventDefault();
     const selectedItemList = get(selectedItemListAtom);
     const itemList = get(itemListAtom);
     const isSelected = (data: ItemData) => selectedItemList.some((item) => item.id === data.id);

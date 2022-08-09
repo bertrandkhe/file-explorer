@@ -26,14 +26,22 @@ import {
   onItemClickAtom,
   contextMenuAnchorPositionAtom,
   ItemData,
+  viewModeAtom,
 } from './atoms';
 
 const PREFIX = 'FileList';
 
 const classes = {
   root: `${PREFIX}-root`,
+  gridView: `${PREFIX}-grid`,
+  listView: `${PREFIX}-list`,
   col: `${PREFIX}-col`,
-  row: `${PREFIX}-row`,
+  backItem: `${PREFIX}-backItem`,
+  listItem: `${PREFIX}-listItem`,
+  listItemButton: `${PREFIX}-listItemButton`,
+  listItemLabel: `${PREFIX}-listItemLabel`,
+  listItemIcon: `${PREFIX}-listItemIcon`,
+  listItemPreviewImage: `${PREFIX}-listItemPreviewImage`,
   selected: `${PREFIX}-selected`,
   hovered: `${PREFIX}-hovered`,
   dragImageContainer: `${PREFIX}-dragImageContainer`,
@@ -45,7 +53,9 @@ const classes = {
 const Root = styled(List)(() => css`
   height: 100%;
   overflow: auto;
-  .${classes.row} {
+  
+
+  .${classes.listItem} {
     padding: 0;
     &.hovered {
       background-color: rgba(0, 0, 0, 0.04);
@@ -61,14 +71,60 @@ const Root = styled(List)(() => css`
     }
   }
 
-  .${classes.col} {
-    text-align: center;
-    &:first-of-type {
-      text-align: left;
+  &.${classes.gridView} {
+    display: flex;
+    flex-wrap: wrap;
+    height: min-content;
+
+    .${classes.listItem} {
+      width: 9rem;
+      height: 10rem;
+      overflow: hidden;
+      align-items: flex-start;
     }
-    &:last-of-type {
-      margin-left: auto;
-      text-align: right;
+
+    .${classes.listItemLabel} {
+      text-align: center;
+    }
+
+    .${classes.listItemButton} {
+      padding: 0.5rem;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .${classes.listItemIcon} {
+      min-width: 0;
+
+      .MuiSvgIcon-root {
+        width: 4rem;
+        height: 4rem;
+      }
+    }
+
+    .${classes.listItemPreviewImage} {
+      width: 8rem;
+      max-height: 6rem;
+      object-fit: scale-down;
+    }
+  }
+
+  &.${classes.listView} {
+    .${classes.listItemLabel} {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+    }
+    .${classes.col} {
+      text-align: center;
+      &:first-of-type {
+        text-align: left;
+      }
+      &:last-of-type {
+        margin-left: auto;
+        text-align: right;
+      }
     }
   }
 
@@ -116,12 +172,14 @@ type FileListProps = {
   className?: string,
 };
 
+
 const FileList: React.FC<FileListProps> = (props) => {
   const { className } = props; 
   const [cwd, setCwd] = useAtom(cwdAtom);
   const prefix = useMemo(() => {
     return cwd.slice(1);
   }, [cwd]);
+  const [viewMode] = useAtom(viewModeAtom);
   const [, setItemList] = useAtom(setItemListAtom);
   const [selectedItemList, dispatchToSelectedItemList] = useAtom(selectedItemListAtom);
   const [, onItemClick] = useAtom(onItemClickAtom);
@@ -169,8 +227,10 @@ const FileList: React.FC<FileListProps> = (props) => {
     setSecondaryPanelContent('operations');
   }
 
+  const viewModeClassName = viewMode === 'grid' ? classes.gridView : classes.listView;
+
   return (
-    <Root className={clsx(classes.root, className)} dense>
+    <Root className={clsx(classes.root, viewModeClassName, className)} dense>
       <ListItemContextMenu 
         anchorReference="anchorPosition"
         anchorPosition={contextMenuAnchorPosition}
@@ -208,12 +268,13 @@ const FileList: React.FC<FileListProps> = (props) => {
           </div>
         </Paper>
       </div>
-      <ListItem className={classes.row}>
+      <ListItem className={clsx(classes.listItem, classes.backItem)}>
         <ListItemButton
+          className={classes.listItemButton}
           onClick={() => navigate(`/${cwdParts.slice(0, -1).join('/')}`)}
           disabled={cwd === '/'}
         >
-          <ListItemText>
+          <ListItemText className={classes.listItemLabel}>
             ..
           </ListItemText>
         </ListItemButton>
@@ -225,15 +286,19 @@ const FileList: React.FC<FileListProps> = (props) => {
           onDoubleClick={() => navigate(`/${folder.prefix}`)}
           data={folder}
           classes={{
-            root: classes.row,
+            root: classes.listItem,
             col: classes.col,
             selected: classes.selected,
+            listItemButton: classes.listItemButton,
+            listItemLabel: classes.listItemLabel,
+            listItemIcon: classes.listItemIcon,
           }}
           selected={selectedItemList.includes(folder)}
           onClick={onItemClick}
           onContextMenu={onContextMenu}
           onDragStart={handleDragStart}
           onDrop={handleDrop}
+          viewMode={viewMode}
         />
       ))}
       {objects.map((obj, i) => (
@@ -242,14 +307,19 @@ const FileList: React.FC<FileListProps> = (props) => {
           index={i}
           key={obj.key}
           classes={{
-            root: classes.row,
+            root: classes.listItem,
             col: classes.col,
             selected: classes.selected,
+            listItemButton: classes.listItemButton,
+            listItemLabel: classes.listItemLabel,
+            listItemIcon: classes.listItemIcon,
+            previewImage: classes.listItemPreviewImage,
           }}
           selected={selectedItemList.includes(obj)}
           onClick={onItemClick}
           onDragStart={handleDragStart}
           onContextMenu={onContextMenu}
+          viewMode={viewMode}
          />
       ))}
       {count === 0 && listObjectsQuery.isLoading && (

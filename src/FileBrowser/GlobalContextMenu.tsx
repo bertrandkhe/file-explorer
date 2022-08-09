@@ -22,38 +22,60 @@ const Root = styled(ContextMenu)(() => css`
   }
 `);
 
+type OpenContextMenuUsingAnchorElAction = {
+  type: 'open',
+  anchorReference?: 'anchorEl',
+  anchorEl: MenuProps['anchorEl'],
+};
+
+type OpenContextMenuUsingAnchorPositionAction = {
+  type: 'open',
+  anchorReference: 'anchorPosition',
+  anchorPosition: MenuProps['anchorPosition'],
+};
+
+type ContextMenuStateAction = {
+  type: 'close',
+} | OpenContextMenuUsingAnchorElAction | OpenContextMenuUsingAnchorPositionAction
+
 export const contextMenuStateAtom = atomWithReducer<{
   open: boolean,
-  anchorEl: MenuProps['anchorEl'],
-}, {
-  type: 'close',
-} | {
-  type: 'open',
-  anchorEl: NonNullable<MenuProps['anchorEl']>,
-}>({
+  anchorReference?: MenuProps['anchorReference'],
+  anchorEl?: MenuProps['anchorEl'],
+  anchorPosition?: MenuProps['anchorPosition'],
+}, ContextMenuStateAction>({
   open: false,
-  anchorEl: null,
 }, (prev, action) => {
   if (!action) {
     return prev;
   }
-  switch (action.type) {
+  const { type, ...state } = action;
+  switch (type) {
     case 'close':
       return {
         open: false,
-        anchorEl: null,
       };
       
     case 'open':
       return {
         open: true,
-        anchorEl: action.anchorEl,
+        ...state,
       };
 
     default:
       throw new Error('Unknown action type');
   }
 });
+
+export const useOpenContextMenu = () => {
+  const [, dispatchContextMenuState] = useAtom(contextMenuStateAtom);
+  return useCallback((args: Omit<OpenContextMenuUsingAnchorElAction, 'type'> | Omit<OpenContextMenuUsingAnchorPositionAction, 'type'>) => {
+    dispatchContextMenuState({
+      ...args,
+      type: 'open',
+    });
+  }, []);
+}
 
 
 const GlobalContextMenu: React.FC = () => {
@@ -80,8 +102,7 @@ const GlobalContextMenu: React.FC = () => {
 
   return (
     <Root
-      open={contextMenuState.open}
-      anchorEl={contextMenuState.anchorEl}
+      {...contextMenuState}
       onClose={closeContextMenu}
     >
       <MenuItem

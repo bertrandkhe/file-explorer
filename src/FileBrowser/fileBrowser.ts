@@ -56,6 +56,17 @@ export interface ObjectStorageAdapter {
     destination: string,
   }): Promise<void>
 
+  objectUrl(args: {
+    key: string,
+    expires?: number,
+  }): Promise<string>
+
+  imagePreviewUrl(args: {
+    key: string,
+    expires?: number,
+    width: number,
+  }): Promise<string>
+
   objectMeta(args: {
     key: string,
   }): Promise<ObjectMeta>
@@ -65,7 +76,7 @@ export interface ObjectStorageAdapter {
   }): Promise<void>
 }
 
-type QueryKey = string & keyof Pick<ObjectStorageAdapter, 'ls' | 'objectMeta'>;
+type QueryKey = string & keyof Pick<ObjectStorageAdapter, 'ls' | 'objectMeta' | 'objectUrl' | 'imagePreviewUrl'>;
 type MutationKey = string & keyof Pick<ObjectStorageAdapter, 'mkdir' | 'rename' | 'delete' | 'upload'>;
 
 export type Prefix<K extends string, T extends string> = `${K}${T}`;

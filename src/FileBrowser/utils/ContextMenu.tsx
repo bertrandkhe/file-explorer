@@ -150,6 +150,9 @@ const ContextMenu: React.FC<MenuProps> = (props) => {
   const { components = {}, children, ...otherProps } = props;
   return (
     <Menu
+      onContextMenu={(e) => {
+        e.preventDefault();
+      }}
       {...otherProps}
       components={{
         ...components,

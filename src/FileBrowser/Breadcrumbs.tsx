@@ -6,17 +6,11 @@ import {
 import { useAtom } from 'jotai';
 import { cwdAtom } from './FileBrowser.atoms';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { contextMenuStateAtom  } from './GlobalContextMenu';
+import { useOpenContextMenu } from './GlobalContextMenu';
 
 const Breadcrumbs: React.FC = () => {
   const [cwd, navigate] = useAtom(cwdAtom);
-  const [, dispatchContextMenuState] = useAtom(contextMenuStateAtom);
-  const openContextMenu = (anchorEl: Element) => {
-    dispatchContextMenuState({
-      type: 'open',
-      anchorEl,
-    });
-  };
+  const openContextMenu = useOpenContextMenu();
   const cwdParts = cwd.split('/').filter(f => f.length > 0);
   const head = cwdParts.slice(0, -1);
   const tail = cwdParts.slice(-1);
@@ -31,7 +25,9 @@ const Breadcrumbs: React.FC = () => {
             return;
           }
           const element = e.currentTarget;
-          openContextMenu(element);
+          openContextMenu({
+            anchorEl: element,
+          });
         }}
         endIcon={(cwdParts.length === 0 && <ArrowDropDownIcon />)}
       >
@@ -59,7 +55,7 @@ const Breadcrumbs: React.FC = () => {
             endIcon={<ArrowDropDownIcon />}
             onClick={(e) => {
               const element = e.currentTarget;
-              openContextMenu(element);
+              openContextMenu({ anchorEl: element });
             }}
           >
             {folder}

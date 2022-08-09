@@ -63,8 +63,7 @@ export const signUrl = (options: {
     expires = dayjs().add(30, 'seconds').unix(),
   } = options;
   const url = new URL(propsUrl);
-  const key = `${decodeURI(url.pathname.slice(1))}`;
-
+  const key = `${decodeURI(url.pathname.slice(1))}${url.search}`;
   const signatureHmac = createHmac('sha1', accessKeySecret);
   const signatureString = [
     'GET',

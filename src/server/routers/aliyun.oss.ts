@@ -9,8 +9,8 @@ import {
 } from '../config/aliyun';
 import { createPostObjectData, ListObjectsResult, signedFetch, signUrl } from '../utils/aliyun.oss.sdk';
 
-const filenameRegex = /^[a-zA-Z0-9_-\s]{1,64}\.[a-z]{2,4}$/;
-const keyRegex = /^([a-zA-Z0-9\/]+)?[a-zA-Z0-9_-\s]{1,64}\.[a-z]{2,4}$/;
+const filenameRegex = /^[;.a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
+const keyRegex = /^([;.a-zA-Z0-9\/]+)?[a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
 const directoryRegex = /^\/([a-zA-Z0-9_-\s]+\/)*/;
 const prefixRegex = /^([a-zA-Z0-9_-\s]+\/)*/;
 
@@ -61,6 +61,33 @@ export const aliyunOSSRouter = createRouter()
     async resolve({ input }) {
       return signUrl({
         ...input,
+      });
+    },
+  })
+  .query('imagePreviewUrl', {
+    input: z.object({
+      key: z.string().regex(keyRegex),
+      expires: z.number().optional(),
+      width: z.number(),
+    }),
+    async resolve({ input }) {
+      const endpoint = `${ossBucketUrl}/${input.key}?x-oss-process=image/resize,w_${input.width}/quality,q_70/format,webp`;
+      return signUrl({
+        url: endpoint,
+        expires: input.expires,
+      });
+    },
+  })
+  .query('objectUrl', {
+    input: z.object({
+      key: z.string().regex(keyRegex),
+      expires: z.number().optional(),
+    }),
+    async resolve({ input }) {
+      const endpoint = `${ossBucketUrl}/${input.key}`;
+      return signUrl({
+        url: endpoint,
+        expires: input.expires,
       });
     },
   })

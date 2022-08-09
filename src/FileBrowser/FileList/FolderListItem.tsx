@@ -26,10 +26,7 @@ export const classes = {
 };
 
 const Root = styled(ListItem)(() => css`
-  .${classes.label} {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr;
-  }
+
 `);
 
 const FolderListItem: React.FC<FolderListItemProps> = (props) => {
@@ -44,6 +41,7 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
     onDragStart,
     onDrop,
     index,
+    viewMode,
   } = props;
 
   const [state, setState] = useState({
@@ -90,7 +88,7 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
       draggable
     >
       <ListItemButton 
-        className={clsx(classes.listItemButton, {
+        className={clsx(classes.listItemButton, propsClasses.listItemButton, {
           [propsClasses.selected || classes.selected]: selected || state.draggedOver,
         })}
         onDoubleClick={() => {
@@ -105,19 +103,23 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
         }}
         disableRipple
       >
-        <ListItemIcon>
+        <ListItemIcon className={propsClasses.listItemIcon}>
           <ItemIcon item={data} />
         </ListItemIcon>
         <ListItemText>
-          <div className={classes.label}>
+          <div className={clsx(classes.label, propsClasses.listItemLabel)}>
             <div className={propsClasses.col}>
               {data.name}
             </div>
-            <div className={propsClasses.col} />
-            <div className={propsClasses.col} />
-            <div className={propsClasses.col} >
-              Folder
-            </div>
+            {viewMode === 'list' && (
+              <>
+                <div className={propsClasses.col} />
+                <div className={propsClasses.col} />
+                <div className={propsClasses.col} >
+                  Folder
+                </div>
+              </>
+            )}
           </div>
         </ListItemText>
       </ListItemButton>

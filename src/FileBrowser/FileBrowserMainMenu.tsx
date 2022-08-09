@@ -2,9 +2,12 @@ import React from 'react';
 import { css, IconButton, styled  } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 import { secondaryPanelContentAtom } from './FileBrowser.atoms';
+import { viewModeAtom } from './FileList';
 import { useAtom } from 'jotai';
 import clsx from 'clsx';
 import HandymanIcon from '@mui/icons-material/Handyman';
+import GridViewIcon from '@mui/icons-material/GridView';
+import TableRowsIcon from '@mui/icons-material/TableRows';
 
 const PREFIX = 'FileBrowserMainMenu';
 
@@ -40,9 +43,30 @@ const Root = styled('nav')(() => css`
 
 const FileBrowserMainMenu: React.FC = () => {
   const [secondaryPanelContent, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
+  const [viewMode, setViewMode] = useAtom(viewModeAtom);
   return (
     <Root>
       <ul className={clsx(classes.menu, classes.rightMenu)}>
+        <li>
+          <IconButton
+            disableRipple
+            size="small"
+            onClick={() => {
+              switch(viewMode) {
+                case 'list':
+                  setViewMode('grid');
+                  break;
+                case 'grid':
+                  setViewMode('list');
+                  break;
+              }
+            }}
+          >
+            {viewMode === 'list' && <GridViewIcon />}
+            {viewMode === 'grid' && <TableRowsIcon />}
+
+          </IconButton>
+        </li>
         <li>
           <IconButton 
             disableRipple
