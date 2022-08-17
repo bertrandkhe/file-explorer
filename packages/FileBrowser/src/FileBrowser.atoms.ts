@@ -18,3 +18,6 @@ export const closeSecondaryPanelAtom = atom(
     set(secondaryPanelContentAtom, '');
   },
 );
+
+// Format must be ['.jpg', '.png', '.jpeg']
+export const allowedExtensionsAtom = atom<string[]>([]);

@@ -12,7 +12,8 @@ const envSchema = z.object({
   ALIYUN_MAX_OBJECT_SIZE: z.preprocess(
     (arg) => Number.parseInt(String(arg), 10),
     z.number().positive(),
-  )
+  ),
+  DISK_ROOT: z.string(),
 });
 
 const env = envSchema.safeParse(process.env);

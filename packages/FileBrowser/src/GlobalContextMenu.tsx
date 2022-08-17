@@ -7,8 +7,9 @@ import { useAtom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
 import { newFolderDialogVisibleAtom } from './NewFolderDialog';
 import { useUploadControls } from './UploadsService';
-import { cwdAtom } from './FileBrowser.atoms';
+import { allowedExtensionsAtom, cwdAtom } from './FileBrowser.atoms';
 import ContextMenu from './utils/ContextMenu';
+import { usePermissions } from './permissions';
 
 const PREFIX = 'GlobalContextMenu';
 
@@ -77,12 +78,20 @@ export const useOpenContextMenu = () => {
   }, []);
 }
 
+export const useCanOpenGlobalContextMenu = (): boolean => {
+  const permissions = usePermissions();
+  return permissions.canMkdir || permissions.canUpload;
+}
+
 
 const GlobalContextMenu: React.FC = () => {
   const [contextMenuState, dispatchContextMenuState] = useAtom(contextMenuStateAtom);
   const { uploadFiles } = useUploadControls();
   const [, setNewFolderDialogVisible] = useAtom(newFolderDialogVisibleAtom);
+  const [allowedExtensions] = useAtom(allowedExtensionsAtom);
   const [cwd] = useAtom(cwdAtom);
+  const permissions = usePermissions();
+  const canOpenGlobalContextMenu = useCanOpenGlobalContextMenu();
   const closeContextMenu = useCallback(() => {
     dispatchContextMenuState({ type: 'close' });
   }, []);
@@ -100,47 +109,58 @@ const GlobalContextMenu: React.FC = () => {
     closeContextMenu();
   }
 
+  if (!canOpenGlobalContextMenu) {
+    return null;
+  }
+
   return (
     <Root
       {...contextMenuState}
       onClose={closeContextMenu}
     >
-      <MenuItem
-        onClick={() => {
-          setNewFolderDialogVisible(true);
-          closeContextMenu();
-        }}
-      >
-        <ListItemIcon>
-          <CreateNewFolderIcon />
-        </ListItemIcon>
-        New folder
-      </MenuItem>
-      <Divider />
-      <MenuItem 
-        onClick={(e) => {
-          const menuItem = e.currentTarget;
-          const inputFile = menuItem.querySelector('input[type="file"]') as HTMLInputElement;
-          inputFile.click();
-        }}
-      >
-        <ListItemIcon>
-          <UploadFileIcon />
-        </ListItemIcon>
-        Import file
-        <input
-          className={classes.inputFile}
-          type="file"
-          onChange={handleImportFile}
-          multiple
-        />
-      </MenuItem>
-      <MenuItem>
-        <ListItemIcon>
-          <DriveFolderUploadIcon />
-        </ListItemIcon>
-        Import folder
-      </MenuItem>
+      {permissions.canMkdir && (
+        <MenuItem
+          onClick={() => {
+            setNewFolderDialogVisible(true);
+            closeContextMenu();
+          }}
+        >
+          <ListItemIcon>
+            <CreateNewFolderIcon />
+          </ListItemIcon>
+          New folder
+        </MenuItem>
+      )}
+      {permissions.canMkdir && <Divider />}
+      {permissions.canUpload && (
+        <MenuItem 
+          onClick={(e) => {
+            const menuItem = e.currentTarget;
+            const inputFile = menuItem.querySelector('input[type="file"]') as HTMLInputElement;
+            inputFile.click();
+          }}
+        >
+          <ListItemIcon>
+            <UploadFileIcon />
+          </ListItemIcon>
+          Import file
+          <input
+            className={classes.inputFile}
+            type="file"
+            onChange={handleImportFile}
+            accept={allowedExtensions.length > 0 ? allowedExtensions.join(',') : undefined}
+            multiple
+          />
+        </MenuItem>
+      )}
+      {permissions.canUploadFolder && (
+        <MenuItem>
+          <ListItemIcon>
+            <DriveFolderUploadIcon />
+          </ListItemIcon>
+          Import folder
+        </MenuItem>
+      )}
     </Root>
   );
 };

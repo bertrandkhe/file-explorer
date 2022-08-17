@@ -6,11 +6,12 @@ import {
 import { useAtom } from 'jotai';
 import { cwdAtom } from './FileBrowser.atoms';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { useOpenContextMenu } from './GlobalContextMenu';
+import { useOpenContextMenu, useCanOpenGlobalContextMenu } from './GlobalContextMenu';
 
 const Breadcrumbs: React.FC = () => {
   const [cwd, navigate] = useAtom(cwdAtom);
   const openContextMenu = useOpenContextMenu();
+  const canOpenGlobalContextMenu = useCanOpenGlobalContextMenu();
   const cwdParts = cwd.split('/').filter(f => f.length > 0);
   const head = cwdParts.slice(0, -1);
   const tail = cwdParts.slice(-1);
@@ -29,7 +30,7 @@ const Breadcrumbs: React.FC = () => {
             anchorEl: element,
           });
         }}
-        endIcon={(cwdParts.length === 0 && <ArrowDropDownIcon />)}
+        endIcon={(cwdParts.length === 0 && canOpenGlobalContextMenu && <ArrowDropDownIcon />)}
       >
         Home
       </Button>
@@ -52,11 +53,12 @@ const Breadcrumbs: React.FC = () => {
           <Button 
             type="button"
             key={i}
-            endIcon={<ArrowDropDownIcon />}
+            endIcon={canOpenGlobalContextMenu ? <ArrowDropDownIcon /> : undefined}
             onClick={(e) => {
               const element = e.currentTarget;
               openContextMenu({ anchorEl: element });
             }}
+            disabled={!canOpenGlobalContextMenu}
           >
             {folder}
           </Button>

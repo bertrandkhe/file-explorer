@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import GridViewIcon from '@mui/icons-material/GridView';
 import TableRowsIcon from '@mui/icons-material/TableRows';
+import { usePermissions } from './permissions';
 
 const PREFIX = 'FileBrowserMainMenu';
 
@@ -44,6 +45,7 @@ const Root = styled('nav')(() => css`
 const FileBrowserMainMenu: React.FC = () => {
   const [secondaryPanelContent, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
   const [viewMode, setViewMode] = useAtom(viewModeAtom);
+  const permissions = usePermissions();
   return (
     <Root>
       <ul className={clsx(classes.menu, classes.rightMenu)}>
@@ -67,38 +69,42 @@ const FileBrowserMainMenu: React.FC = () => {
 
           </IconButton>
         </li>
-        <li>
-          <IconButton 
-            disableRipple
-            size="small"
-            className={clsx(classes.btn, {
-              [classes.btnActive]: secondaryPanelContent === 'operations',
-            })}
-            onClick={() => {
-              setSecondaryPanelContent(
-                secondaryPanelContent === 'operations' ? '' : 'operations', 
-              );
-            }}
-          >
-            <HandymanIcon />
-          </IconButton>
-        </li>
-        <li>
-          <IconButton
-            size="small"
-            disableRipple
-            className={clsx(classes.btn, {
-              [classes.btnActive]: secondaryPanelContent === 'uploads',
-            })}
-            onClick={() => {
-              setSecondaryPanelContent(
-                secondaryPanelContent === 'uploads' ? '' : 'uploads', 
-              );
-            }}
-          >
-            <UploadIcon />
-          </IconButton>
-        </li>
+        {permissions.canCopy || permissions.canMove && (
+          <li>
+            <IconButton 
+              disableRipple
+              size="small"
+              className={clsx(classes.btn, {
+                [classes.btnActive]: secondaryPanelContent === 'operations',
+              })}
+              onClick={() => {
+                setSecondaryPanelContent(
+                  secondaryPanelContent === 'operations' ? '' : 'operations', 
+                );
+              }}
+            >
+              <HandymanIcon />
+            </IconButton>
+          </li>
+        )}
+        {permissions.canUpload && (
+          <li>
+            <IconButton
+              size="small"
+              disableRipple
+              className={clsx(classes.btn, {
+                [classes.btnActive]: secondaryPanelContent === 'uploads',
+              })}
+              onClick={() => {
+                setSecondaryPanelContent(
+                  secondaryPanelContent === 'uploads' ? '' : 'uploads', 
+                );
+              }}
+            >
+              <UploadIcon />
+            </IconButton>
+          </li>
+        )}
       </ul>
     </Root>
   );

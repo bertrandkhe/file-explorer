@@ -11,9 +11,10 @@ import clsx from 'clsx';
 import React, { useState } from 'react';
 import { ListItemProps } from './ObjectListItem';
 import ItemIcon from './ItemIcon';
+import { usePermissions } from '../permissions';
 
 export type FolderListItemProps = ListItemProps<Folder> & {
-  onDrop(args: { ev: React.DragEvent, data: Folder }): void,
+  onDrop?(args: { ev: React.DragEvent, data: Folder }): void,
 };
 
 const PREFIX = 'FolderListItem';
@@ -48,6 +49,9 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
     draggedOver: false,
   });
 
+  const permissions = usePermissions();
+  console.log({ permissions });
+
   return (
     <Root
       data-index={index}
@@ -65,7 +69,8 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
         }
       }}
       onDragOver={(ev) => {
-        if (selected) {
+        if (selected || !permissions.canMove) {
+          ev.dataTransfer.dropEffect = 'none';
           return;
         }
         ev.preventDefault();
@@ -80,9 +85,15 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
         });
       }}
       onDrop={(ev) => {
+        if (!permissions.canMove) {
+          return;
+        }
         setState({
           draggedOver: false,
         });
+        if (!onDrop) {
+          return;
+        }
         onDrop({ ev, data });
       }}
       draggable

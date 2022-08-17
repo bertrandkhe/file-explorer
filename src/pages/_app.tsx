@@ -6,7 +6,6 @@ import { transformer } from '../utils/trpc';
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
-      <CssBaseline />
       <Component {...pageProps} />
     </>
   );

@@ -1,5 +1,4 @@
 import React from 'react';
-import { useQueryClient } from 'react-query';
 import { atom, useAtom } from 'jotai';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
 import { fileBrowser } from './fileBrowser';

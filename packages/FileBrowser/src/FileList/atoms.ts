@@ -89,6 +89,13 @@ export const copySelectionToClipboardAtom = atom(
   },
 );
 
+export const clearClipboardAtom = atom(
+  null,
+  (get, set) => {
+    set(clipboardAtom, []);
+  },
+);
+
 
 const selectionAnchorAtom = atom<ItemData | null>(null);
 

@@ -16,7 +16,7 @@ export interface ObjectMeta {
   uri: string,
   contentType: string,
   size: string,
-  md5: string,
+  md5?: string,
   exif?: {
     width: number,
     height: number,
@@ -109,12 +109,12 @@ export interface ReactQueryHooks<QueryKeyPrefix extends string> {
 }
 
 
-type FileBrowserContextValue = {
+
+export type FileBrowserContextValue = {
   adapter: ObjectStorageAdapter,
-}
+};
 
-export const FileBrowserContext = React.createContext<FileBrowserContextValue | void>(undefined);
-
+export const FileBrowserContext = React.createContext<FileBrowserContextValue | null>(null);
 
 export const useContext = (): FileBrowserContextValue => {
   const context = React.useContext(FileBrowserContext);

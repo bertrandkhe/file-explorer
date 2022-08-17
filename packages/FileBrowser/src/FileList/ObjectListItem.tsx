@@ -14,6 +14,8 @@ import { fileBrowser, Object } from '../fileBrowser';
 import { grey } from '@mui/material/colors';
 import ItemIcon from './ItemIcon';
 import { ViewMode } from './atoms';
+import { allowedExtensionsAtom } from '../FileBrowser.atoms';
+import { useAtom } from 'jotai';
 
 export type ListItemProps<Data> = {
   data: Data,
@@ -39,7 +41,7 @@ export type ListItemProps<Data> = {
 type ObjectListItemProps = ListItemProps<Object>;
 
 const getFileType = (ext: string): string => {
-  switch (ext.toLowerCase()) {
+  switch (ext) {
     case 'jpg':
     case 'jpeg':
     case 'png':
@@ -55,7 +57,7 @@ const getFileType = (ext: string): string => {
       return 'Document'
 
     default:
-      return `File ${ext.toUpperCase()}`;
+      return `File ${ext}`;
   }
 }
 
@@ -94,8 +96,9 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
     viewMode,
   } = props;
   const { name, lastModified, size, key } = data;
-  const extension = name.split('.').pop() || '';
+  const extension = (name.split('.').pop() || '').toLowerCase();
   const [focused, setFocused] = useState(false);
+  const [allowedExtensions] = useAtom(allowedExtensionsAtom);
 
   const isGridViewMode = viewMode === 'grid';
   const isImage = getFileType(extension) === 'Image';
@@ -110,6 +113,10 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
     staleTime: expires.diff(now, 'seconds'),
   });
   const objectUrl = objectUrlQuery.data;
+
+  if (allowedExtensions.length > 0 && !allowedExtensions.includes(`.${extension}`)) {
+    return null;
+  }
 
   return (
     <Root 

@@ -12,6 +12,7 @@ import React, { useMemo, useRef } from 'react';
 import { useAtom } from 'jotai';
 import { cwdAtom } from '../FileBrowser.atoms';
 import { fileBrowser, Folder } from '../fileBrowser';
+import { usePermissions } from '../permissions';
 import ObjectListItem from './ObjectListItem';
 import FolderListItem from './FolderListItem';
 import ListItemContextMenu from './ListItemContextMenu';
@@ -74,7 +75,8 @@ const Root = styled(List)(() => css`
   &.${classes.gridView} {
     display: flex;
     flex-wrap: wrap;
-    height: min-content;
+    overflow: auto;
+
 
     .${classes.listItem} {
       width: 9rem;
@@ -198,6 +200,8 @@ const FileList: React.FC<FileListProps> = (props) => {
   });
   const listObjectsResult = listObjectsQuery.data;
   const { folders = [], objects = [], count = 0 } = listObjectsResult || {};
+  const permissions = usePermissions();
+
 
   const navigate = (directory: string) => {
     dispatchToSelectedItemList({ type: 'reset' });
@@ -212,7 +216,7 @@ const FileList: React.FC<FileListProps> = (props) => {
     }
     const dragImage = dragImgElemRef.current as HTMLDivElement;
     ev.dataTransfer.setDragImage(dragImage, 10, 10);
-  }
+  };
 
   const handleDrop = (args: { data: Folder }) => {
     const { data } = args;
@@ -225,7 +229,7 @@ const FileList: React.FC<FileListProps> = (props) => {
     });
     queueOperations(operations);
     setSecondaryPanelContent('operations');
-  }
+  };
 
   const viewModeClassName = viewMode === 'grid' ? classes.gridView : classes.listView;
 

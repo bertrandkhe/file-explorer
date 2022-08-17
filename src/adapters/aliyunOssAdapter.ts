@@ -3,7 +3,7 @@ import {
   Folder,
   ObjectMeta,
   Object,
-} from "../FileBrowser/fileBrowser";
+} from "@/FileBrowser";
 import { client } from "../utils/trpc";
 
 
