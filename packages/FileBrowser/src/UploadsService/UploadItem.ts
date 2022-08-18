@@ -19,7 +19,7 @@ export class UploadItem {
   public key: string;
   public directory: string;
 
-  public error: unknown | null = null;
+  public error: Error | null = null;
   public version = 1;
 
   private status: Status;
@@ -60,7 +60,7 @@ export class UploadItem {
 
   setStatus(status: Status.FAILED, error: unknown): void;
   setStatus(status: Omit<Status, Status.FAILED>): void;
-  setStatus(status: Status, error?: unknown) {
+  setStatus(status: Status, error?: Error) {
     this.status = status;
     if (error) {
       this.error = error;

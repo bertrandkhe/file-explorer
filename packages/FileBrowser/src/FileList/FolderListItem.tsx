@@ -50,8 +50,6 @@ const FolderListItem: React.FC<FolderListItemProps> = (props) => {
   });
 
   const permissions = usePermissions();
-  console.log({ permissions });
-
   return (
     <Root
       data-index={index}

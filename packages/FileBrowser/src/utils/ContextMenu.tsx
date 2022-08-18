@@ -10,6 +10,7 @@ import {
   objectListAtom,
 } from '../FileList/atoms';
 import { useAtom } from 'jotai';
+import { useFileBrowserContext } from '../fileBrowser';
 
 type ContextMenuBackdropProps = Omit<
   BackdropProps,
@@ -148,6 +149,7 @@ const ContextMenuBackdrop: React.FC<ContextMenuBackdropProps> = (props) => {
 
 const ContextMenu: React.FC<MenuProps> = (props) => {
   const { components = {}, children, ...otherProps } = props;
+  const { portalContainer } = useFileBrowserContext();
   return (
     <Menu
       onContextMenu={(e) => {
@@ -158,6 +160,7 @@ const ContextMenu: React.FC<MenuProps> = (props) => {
         ...components,
         Backdrop: ContextMenuBackdrop,
       }}
+      container={portalContainer}
     >
       {children}
     </Menu>

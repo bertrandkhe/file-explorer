@@ -21,6 +21,7 @@ import UploadsPanel from './UploadsPanel';
 import UploadsService from './UploadsService';
 import { grantAllPermissions, permissionsAtom, usePermissions } from './permissions';
 import { ViewMode } from './FileList/atoms';
+import FileBrowserActions from './FileBrowserActions';
 
 const PREFIX = 'FileBrowser';
 
@@ -28,7 +29,9 @@ const classes = {
   root: `${PREFIX}-root`,
   main: `${PREFIX}-main`,
   mainGrid: `${PREFIX}-mainGrid`,
+  header: `${PREFIX}-header`,
   fileList: `${PREFIX}-fileList`,
+  actions: `${PREFIX}-actions`,
   secondaryPanel: `${PREFIX}-secondaryPanel`,
   secondaryPanelPaper: `${PREFIX}-secondaryPanelPaper`,
   secondaryPanelVisible: `${PREFIX}-secondaryPanelVisible`,
@@ -56,12 +59,13 @@ const Root = styled('div')(() => css`
     height: 100%;
     width: 100%;
     display: grid;
-    grid-template: 2.5rem 1fr / 1fr 1fr;
+    grid-template: 2.5rem 1fr 3.5rem / 1fr;
     grid-row-gap: 0.25rem;
   }
 
-  .${classes.fileList} {
-    grid-column: 1 / span 2;
+  .${classes.header} {
+    display: grid;
+    grid-template: 1fr / auto auto;
   }
 
   .${classes.secondaryPanel} {
@@ -90,8 +94,6 @@ const FileBrowser: React.FC = () => {
   const [, clearSelection] = useAtom(clearSelectionAtom)
   const secondaryPanelIsVisible = secondaryPanelContent.length > 0;
   const openContextMenu = useOpenContextMenu();
-  const permissions = usePermissions();
-
   return (
     <Root 
       className={clsx(
@@ -129,9 +131,12 @@ const FileBrowser: React.FC = () => {
         }}
       >
         <div className={classes.mainGrid}>
-          <Breadcrumbs />
-          <FileBrowserMainMenu />
-          <FileList className={classes.fileList} />
+          <div className={classes.header}>
+            <Breadcrumbs />
+            <FileBrowserMainMenu />
+          </div>
+          <FileList />
+          <FileBrowserActions />
         </div>
       </div>
       <div className={classes.secondaryPanel}>
@@ -157,6 +162,9 @@ const ScopedFileBrowser: React.FC<ScopedFileBrowserProps> = (props) => {
     <FileBrowserContext.Provider 
       value={{
         adapter: props.adapter,
+        onChooseFiles: props.onChooseFiles,
+        onClose: props.onClose,
+        portalContainer: props.portalContainer,
       }}
     >
       <Provider

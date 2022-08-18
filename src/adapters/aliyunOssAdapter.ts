@@ -22,6 +22,14 @@ const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
   },
   async upload(args: Parameters<ObjectStorageAdapter['upload']>[0]): Promise<string> {
     const { key, file, onProgress, onReady } = args;
+    try {
+      await client.query('aliyun_oss.objectMeta', {
+        key,
+      });
+      return Promise.reject(new Error('Upload failed. A file with this name already exists.'));
+    } catch (err) {
+      // Normal flow
+    }
     const signData = await client.query('aliyun_oss.postObjectData', {
       key: key,
       contentType: file.type.length > 0 ? file.type : undefined,

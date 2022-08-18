@@ -9,10 +9,10 @@ import {
 } from '../config/aliyun';
 import { createPostObjectData, ListObjectsResult, signedFetch, signUrl } from '../utils/aliyun.oss.sdk';
 
-const filenameRegex = /^[;.a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
-const keyRegex = /^([;.a-zA-Z0-9\/]+)?[a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
+const filenameRegex = /^[\(\);.a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
+const keyRegex = /^[\(\)a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
 const directoryRegex = /^\/([a-zA-Z0-9_-\s]+\/)*/;
-const prefixRegex = /^([a-zA-Z0-9_-\s]+\/)*/;
+const prefixRegex = /^([\(\)a-zA-Z0-9_-\s]+\/)*/;
 
 export const aliyunOSSRouter = createRouter()
   .query('postTmpObjectData', {
@@ -109,13 +109,15 @@ export const aliyunOSSRouter = createRouter()
       if (response.ok) {
         if (contentType.startsWith('image/')) {
           const exifResponse = await signedFetch(`${endpoint}?x-oss-process=image/info`);
-          const exifData = await exifResponse.json() as {
-            ImageHeight: { value: string },
-            ImageWidth: { value: string },
-            Format: { value: string },
-          };
-          exif.width = Number.parseInt(exifData.ImageWidth.value, 10);
-          exif.height = Number.parseInt(exifData.ImageHeight.value, 10);
+          if (exifResponse.ok) {
+            const exifData = await exifResponse.json() as {
+              ImageHeight: { value: string },
+              ImageWidth: { value: string },
+              Format: { value: string },
+            };
+            exif.width = Number.parseInt(exifData.ImageWidth.value, 10);
+            exif.height = Number.parseInt(exifData.ImageHeight.value, 10);
+          }
         }
         return {
           name: input.key.split('/').pop() as string,

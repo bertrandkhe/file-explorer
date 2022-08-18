@@ -1,16 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { atom, useAtom } from 'jotai';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import { fileBrowser } from './fileBrowser';
+import { fileBrowser, useFileBrowserContext } from './fileBrowser';
 import { cwdAtom } from './FileBrowser.atoms';
+import { folderListAtom } from './FileList/atoms';
 
 export const newFolderDialogVisibleAtom = atom(false);
 
 const NewFolderDialog: React.FC = () => {
   const [cwd] = useAtom(cwdAtom);
+  const [folderList] = useAtom(folderListAtom);
+  const [errors, setErrors] = useState<{
+    folderName: string,
+  }>({
+    folderName: '',
+  });
+  const existingKeys = folderList.map((f) => f.prefix);
   const [visible, setVisible] = useAtom(newFolderDialogVisibleAtom);
   const closeFolderDialog = () => setVisible(false);
   const invalidateQueries = fileBrowser.useInvalidateQueries();
+  const { portalContainer } = useFileBrowserContext();
 
   const createFolderMutation = fileBrowser.useMutation(['mkdir'], {
     onSuccess() {
@@ -25,11 +34,24 @@ const NewFolderDialog: React.FC = () => {
     const formData = new FormData(e.currentTarget);
     const folderName = formData.get('folderName') as string;
     const key = `${cwd}${folderName}/`.replace(/^(\/)+/, '');
+    if (existingKeys.includes(key)) {
+      setErrors({
+        folderName: `Folder "${folderName}" already exists.`,
+      });
+      return;
+    }
     createFolderMutation.mutate({ key });
   };
 
+  useEffect(() => {
+    return () => {
+      setErrors({ folderName: '' });
+    };
+  }, [visible]);
+
   return (
     <Dialog
+      container={portalContainer}
       open={visible}
       onClose={() => setVisible(false)}
       TransitionProps={{
@@ -51,6 +73,8 @@ const NewFolderDialog: React.FC = () => {
             name="folderName"
             label="New folder name"
             placeholder="Input the folder name"
+            error={errors.folderName.length > 0}
+            helperText={errors.folderName}
             required
           />
         </DialogContent>

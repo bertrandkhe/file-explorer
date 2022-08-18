@@ -52,7 +52,6 @@ const classes = {
 };
 
 const Root = styled(List)(() => css`
-  height: 100%;
   overflow: auto;
   
 
@@ -74,6 +73,7 @@ const Root = styled(List)(() => css`
 
   &.${classes.gridView} {
     display: flex;
+    align-content: baseline;
     flex-wrap: wrap;
     overflow: auto;
 

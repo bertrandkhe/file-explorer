@@ -1,6 +1,6 @@
 import React from 'react';
 import { styled, css, LinearProgress, IconButton, ListItem, Typography } from '@mui/material'
-import { grey } from '@mui/material/colors';
+import { grey, red } from '@mui/material/colors';
 import CloseIcon from '@mui/icons-material/Close';
 import StopIcon from '@mui/icons-material/Stop';
 import ReplayIcon from '@mui/icons-material/Replay';
@@ -18,6 +18,7 @@ const classes = {
   label: `${PREFIX}-label`,
   actions: `${PREFIX}-actions`,
   filename: `${PREFIX}-filename`,
+  error: `${PREFIX}-error`,
 };
 
 const Root = styled(ListItem)(() => css`
@@ -75,6 +76,10 @@ const Root = styled(ListItem)(() => css`
   .${classes.status} {
     color:  ${grey[600]};
   }
+
+  .${classes.error} {
+    color: ${red[600]};
+  }
 `);
 
 type UploadControlProps = {
@@ -92,6 +97,7 @@ const UploadControl: React.FC<UploadControlProps> = (props) => {
     isDone,
     isStopped,
     isOnHold,
+    hasFailed,
   } = useUploadStatus(item);
   const progress = useUploadProgress(item);
   const { 
@@ -110,11 +116,14 @@ const UploadControl: React.FC<UploadControlProps> = (props) => {
           </div>
           {!isInProgress && (
             <Typography
-              className={classes.status}
+              className={clsx(classes.status, {
+                [classes.error]: hasFailed,
+              })}
               variant="caption"
             >
               {isDone && 'Done'}
               {isStopped && 'Cancelled'}
+              {item.error && item.error.message}
             </Typography>
           )}
         </div>
@@ -139,7 +148,7 @@ const UploadControl: React.FC<UploadControlProps> = (props) => {
               <ReplayIcon />
             </IconButton>
           )}
-          {(isDone || isOnHold || isStopped) && (
+          {(isDone || isOnHold || isStopped || hasFailed) && (
             <IconButton
               onClick={() => closeUpload(item)}
               size="small"

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { ModalProps } from '@mui/material';
 import { UseQueryResult, useMutation, useQuery, UseQueryOptions, UseMutationResult, UseMutationOptions, useQueryClient, QueryClient } from 'react-query';
 
 export interface Object {
@@ -112,11 +113,14 @@ export interface ReactQueryHooks<QueryKeyPrefix extends string> {
 
 export type FileBrowserContextValue = {
   adapter: ObjectStorageAdapter,
+  onChooseFiles?(files: Object[]): void,
+  onClose?(): void,
+  portalContainer?: ModalProps['container'],
 };
 
 export const FileBrowserContext = React.createContext<FileBrowserContextValue | null>(null);
 
-export const useContext = (): FileBrowserContextValue => {
+export const useFileBrowserContext = (): FileBrowserContextValue => {
   const context = React.useContext(FileBrowserContext);
   if (!context) {
     throw new Error('');
@@ -152,7 +156,7 @@ export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
     },
 
     useQuery(args, options) {
-      const { adapter } = useContext();
+      const { adapter } = useFileBrowserContext();
       const operation = args[0];
       const queryFn = adapter[operation];
       const queryKey = [this.getQueryKey(args[0]), args[1]];
@@ -160,7 +164,7 @@ export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
     },
 
     useMutation(args, options) {
-      const { adapter } = useContext();
+      const { adapter } = useFileBrowserContext();
       const mutateFn = adapter[args[0]];
       return useMutation<any, any, any>((vars) => {
         return mutateFn(vars as any);
