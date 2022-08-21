@@ -3,6 +3,7 @@ import { Button, css, styled } from '@mui/material';
 import { useFileBrowserContext, Object } from './fileBrowser.lib';
 import { selectedItemListAtom, } from './FileList/atoms';
 import { useAtom } from 'jotai';
+import { grey } from '@mui/material/colors';
 
 const PREFIX = 'FileBrowserActions';
 
@@ -12,9 +13,12 @@ const classes = {
 
 
 const Root = styled('div')(() => css`
-  display: flex;
-  justify-content: flex-end;
-  padding: 0.5rem 0;
+  & {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem 0;
+    border-top: 1px solid ${grey[300]};
+  }
 
   .MuiButton-root {
     margin-right: 0.5rem;

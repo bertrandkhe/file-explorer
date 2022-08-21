@@ -55,7 +55,7 @@ const classes = {
 
 const gridItemWidth = 144;
 const gridItemHeight = 160;
-const listItemHeight = 40;
+const listItemHeight = 48;
 
 const Root = styled('div')(() => css`
   overflow: auto;
@@ -121,8 +121,17 @@ const Root = styled('div')(() => css`
     .${classes.listItem} {
       width: 100%;
       height: ${listItemHeight}px;
+      overflow: hidden;
     }
 
+    .${classes.listItemButton} {
+      align-items: flex-start;
+    }
+
+    .${classes.listItemIcon} {
+      margin-top: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
     .${classes.listItemLabel} {
       display: grid;
       grid-template-columns: 2fr 1fr 1fr 1fr;
@@ -212,10 +221,9 @@ const FileList: React.FC<FileListProps> = (props) => {
   });
   const listObjectsResult = listObjectsQuery.data;
   const { folders = [], objects = [], count = 0 } = listObjectsResult || {};
-
-  const navigate = (directory: string) => {
+  const navigate = (prefix: string) => {
     dispatchToSelectedItemList({ type: 'reset' });
-    setCwd(directory);
+    setCwd(`/${prefix}`);
   };
 
   const isSelected = (data: ItemData) => selectedItemList.some((item) => item.id === data.id);
@@ -366,7 +374,7 @@ const FileList: React.FC<FileListProps> = (props) => {
                   <FolderListItem
                     key={folder.prefix}
                     index={folders.indexOf(folder)}
-                    onDoubleClick={() => navigate(`/${folder.prefix}`)}
+                    onDoubleClick={() => navigate(`${folder.prefix}`)}
                     data={folder}
                     classes={{
                       root: classes.listItem,

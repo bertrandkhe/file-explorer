@@ -1,14 +1,14 @@
 import React from 'react';
 import { css, IconButton, styled  } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
-import { secondaryPanelContentAtom } from './FileBrowser.atoms';
-import { viewModeAtom } from './FileList';
+import { secondaryPanelContentAtom } from '../FileBrowser.atoms';
+import { viewModeAtom } from '../FileList';
 import { useAtom } from 'jotai';
 import clsx from 'clsx';
 import HandymanIcon from '@mui/icons-material/Handyman';
 import GridViewIcon from '@mui/icons-material/GridView';
 import TableRowsIcon from '@mui/icons-material/TableRows';
-import { usePermissions } from './permissions';
+import { usePermissions } from '../permissions';
 
 const PREFIX = 'FileBrowserMainMenu';
 

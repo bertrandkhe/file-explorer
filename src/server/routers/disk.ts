@@ -85,9 +85,8 @@ export const diskRouter = createRouter()
         count: readDirResult.length,
       };
       await Promise.all(readDirResult.map(async (value) => {
-        const key = `${relPath}/${value.name}`;
+        const key = relPath.length > 0 ? `${relPath}/${value.name}` : value.name;
         if (value.isDirectory()) {
-          const prefix = `${relPath}/${value.name}`;
           output.folders.push({
             id: key,
             type: 'folder',

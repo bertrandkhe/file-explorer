@@ -1,11 +1,12 @@
 import { Paper } from '@mui/material';
 import React, { useMemo } from 'react';
 import createAliyunOssAdapter from '../adapters/aliyunOssAdapter';
+import createDiskAdapter from '../adapters/diskAdapter';
 import FileBrowser, { denyAllPermissions, ObjectStorageAdapter } from '@/FileBrowser';
 
 const Home: React.FC = () => {
   const adapter = useMemo<ObjectStorageAdapter>(() => {
-    return createAliyunOssAdapter();
+    return createDiskAdapter();
   }, []);
   return (
     <Paper 
@@ -20,7 +21,6 @@ const Home: React.FC = () => {
           canUpload: true,
           canMkdir: true,
         }}
-        allowedExtensions={['.jpg', '.jpeg', '.png', '.ico']}
         onChooseFiles={(files) => {
           console.log(files);
         }}

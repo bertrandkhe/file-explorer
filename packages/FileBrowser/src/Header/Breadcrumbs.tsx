@@ -4,9 +4,9 @@ import {
   Button,
 } from '@mui/material';
 import { useAtom } from 'jotai';
-import { cwdAtom } from './FileBrowser.atoms';
+import { cwdAtom } from '../FileBrowser.atoms';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import { useOpenContextMenu, useCanOpenGlobalContextMenu } from './GlobalContextMenu';
+import { useOpenContextMenu, useCanOpenGlobalContextMenu } from '../GlobalContextMenu';
 
 const Breadcrumbs: React.FC = () => {
   const [cwd, navigate] = useAtom(cwdAtom);

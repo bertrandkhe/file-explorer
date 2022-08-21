@@ -14,9 +14,8 @@ import {
       isTruncated: boolean; 
       count: number; 
     }> {
-      const prefix = args.prefix.startsWith('/') ? args.prefix.slice(1) : args.prefix;
       const result = await client.query('disk.listObjects', {
-        prefix,
+        prefix: args.prefix,
       });
       return result;
     },

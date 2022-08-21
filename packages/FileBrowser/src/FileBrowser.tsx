@@ -1,8 +1,7 @@
 import React from 'react';
-import Breadcrumbs from './Breadcrumbs';
+import Header from './Header';
 import GlobalContextMenu, { useOpenContextMenu } from './GlobalContextMenu';
 import NewFolderDialog from './NewFolderDialog';
-import FileBrowserMainMenu from './FileBrowserMainMenu';
 import FileList, { clearSelectionAtom, viewModeAtom } from './FileList';
 import { css, styled } from '@mui/material';
 import { 
@@ -63,13 +62,8 @@ const Root = styled('div')(() => css`
     height: 100%;
     width: 100%;
     display: grid;
-    grid-template: 2.5rem 1fr 3.5rem / 1fr;
+    grid-template: 4rem 1fr 3.5rem / 1fr;
     grid-row-gap: 0.25rem;
-  }
-
-  .${classes.header} {
-    display: grid;
-    grid-template: 1fr / auto auto;
   }
 
   .${classes.secondaryPanel} {
@@ -135,10 +129,7 @@ const FileBrowser: React.FC = () => {
         }}
       >
         <div className={classes.mainGrid}>
-          <div className={classes.header}>
-            <Breadcrumbs />
-            <FileBrowserMainMenu />
-          </div>
+          <Header />
           <FileList />
           <FileBrowserActions />
         </div>
