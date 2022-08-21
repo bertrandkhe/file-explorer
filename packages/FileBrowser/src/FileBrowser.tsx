@@ -12,14 +12,18 @@ import {
   allowedExtensionsAtom,
 } from './FileBrowser.atoms';
 import { useAtom, Provider, Atom } from 'jotai';
-import { FileBrowserContext } from './fileBrowser';
-import type { FileBrowserContextValue } from './fileBrowser';
+import { FileBrowserContext } from './fileBrowser.lib';
+import type { FileBrowserContextValue } from './fileBrowser.lib';
 import clsx from 'clsx';
 import OperationsPanel from './OperationsPanel';
 import OperationsService from './OperationsService';
 import UploadsPanel from './UploadsPanel';
 import UploadsService from './UploadsService';
-import { grantAllPermissions, permissionsAtom, usePermissions } from './permissions';
+import { 
+  grantAllPermissions, 
+  permissionsAtom, 
+  Permissions,
+} from './permissions';
 import { ViewMode } from './FileList/atoms';
 import FileBrowserActions from './FileBrowserActions';
 

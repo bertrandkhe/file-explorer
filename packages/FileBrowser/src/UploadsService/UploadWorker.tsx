@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import UploadItem from './UploadItem';
-import { fileBrowser } from '../fileBrowser';
+import { fileBrowser } from '../fileBrowser.lib';
 import useUploadControls from './hooks';
 
 type UploadWorkerProps = {

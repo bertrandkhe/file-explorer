@@ -10,7 +10,7 @@ import {
   objectListAtom,
 } from '../FileList/atoms';
 import { useAtom } from 'jotai';
-import { useFileBrowserContext } from '../fileBrowser';
+import { useFileBrowserContext } from '../fileBrowser.lib';
 
 type ContextMenuBackdropProps = Omit<
   BackdropProps,

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { atom, useAtom } from 'jotai';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from '@mui/material';
-import { fileBrowser, useFileBrowserContext } from './fileBrowser';
+import { fileBrowser, useFileBrowserContext } from './fileBrowser.lib';
 import { cwdAtom } from './FileBrowser.atoms';
 import { folderListAtom } from './FileList/atoms';
 

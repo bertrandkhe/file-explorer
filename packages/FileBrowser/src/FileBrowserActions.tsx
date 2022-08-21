@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button, css, styled } from '@mui/material';
-import { useFileBrowserContext, Object } from './fileBrowser';
+import { useFileBrowserContext, Object } from './fileBrowser.lib';
 import { selectedItemListAtom, } from './FileList/atoms';
 import { useAtom } from 'jotai';
 

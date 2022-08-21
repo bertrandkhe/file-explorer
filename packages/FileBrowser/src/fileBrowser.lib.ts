@@ -31,15 +31,17 @@ export interface Folder {
   name: string,
 }
 
+export type LsResult = {
+  objects: Object[];
+  folders: Folder[];
+  isTruncated: boolean;
+  count: number
+};
+
 export interface ObjectStorageAdapter {
   ls(args: { 
     prefix: string
-  }): Promise<{
-    objects: Object[],
-    folders: Folder[],
-    isTruncated: boolean,
-    count: number,
-  }>
+  }): Promise<LsResult>
 
   upload(args: {
     key: string,

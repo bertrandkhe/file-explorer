@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Operation, OperationStatus } from './types';
-import { fileBrowser } from '../fileBrowser';
+import { fileBrowser } from '../fileBrowser.lib';
 import { finalizeOperationAtom, failOperationAtom } from './atoms';
 import { useAtom } from 'jotai';
 

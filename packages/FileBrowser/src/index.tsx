@@ -5,7 +5,7 @@ export type {
   ObjectMeta,
   Folder,
   ObjectStorageAdapter,
-} from './fileBrowser';
+} from './fileBrowser.lib';
 
 export type {
   Permissions,
