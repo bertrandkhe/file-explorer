@@ -1,6 +1,6 @@
 {
   "name": "@bertrandkhe/file-browser",
-  "version": "0.0.1",
+  "version": "0.0.4",
   "scripts": {
     "build": "rm -rf build && tsc --outDir build && cp package.json build/package.json",
     "publish": ""
@@ -8,18 +8,24 @@
   "main": "./index.js",
   "types": "./index.d.ts",
   "sideEffects": false,
-  "peerDependencies": {
-    "@mui/icons-material": "^5.8.4",
-    "@mui/material": "^5.9.0",
+  "dependencies": {
+    "@tanstack/react-virtual": "^3.0.0-beta.18",
     "dayjs": "^1.11.3",
     "filesize": "^9.0.11",
     "jotai": "^1.7.5",
-    "react": "^17.0.0 | ^18.0.0",
-    "react-dom": "^17.0.0 | ^18.0.0",
-    "react-query": "^3.39.2",
     "uuid": "^8.3.2"
+  },
+  "peerDependencies": {
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.9.0",
+    "react": "^17.0.2 || ^18.0.0",
+    "react-dom": "^17.0.2 || ^18.0.0",
+    "react-query": "^3.39.2"
   },
   "devDependencies": {
     "typescript": "^4.6.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

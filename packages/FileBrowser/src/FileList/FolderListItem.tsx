@@ -6,7 +6,7 @@ import {
   styled,
   css,
 } from '@mui/material';
-import { Folder } from '../fileBrowser';
+import { Folder } from '../fileBrowser.lib';
 import clsx from 'clsx';
 import React, { useState } from 'react';
 import { ListItemProps } from './ObjectListItem';
@@ -26,7 +26,7 @@ export const classes = {
   selected: `${PREFIX}-selected`,
 };
 
-const Root = styled(ListItem)(() => css`
+const Root = styled('div')(() => css`
 
 `);
 

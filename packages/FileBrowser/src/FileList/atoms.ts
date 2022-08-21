@@ -1,7 +1,7 @@
 import { atom } from 'jotai';
 import { MenuProps } from '@mui/material';
 import { atomWithReducer } from 'jotai/utils';
-import { Object, Folder } from '../fileBrowser';
+import { Object, Folder } from '../fileBrowser.lib';
 
 export type ItemData = (Folder | Object);
 

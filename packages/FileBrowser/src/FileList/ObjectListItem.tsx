@@ -10,7 +10,7 @@ import {
 import filesize from 'filesize';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
-import { fileBrowser, Object } from '../fileBrowser';
+import { fileBrowser, Object } from '../fileBrowser.lib';
 import { grey } from '@mui/material/colors';
 import ItemIcon from './ItemIcon';
 import { ViewMode } from './atoms';
@@ -74,7 +74,7 @@ export const classes = {
   listItemButton: `${PREFIX}-listItemButton`,
 };
 
-const Root = styled(ListItem)(() => css`
+const Root = styled('div')(() => css`
   .${classes.lastModified} {
     color: ${grey[600]};
   }
