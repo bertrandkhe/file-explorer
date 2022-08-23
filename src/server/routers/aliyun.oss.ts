@@ -10,7 +10,7 @@ import {
 import { createPostObjectData, ListObjectsResult, signedFetch, signUrl } from '../utils/aliyun.oss.sdk';
 
 const filenameRegex = /^[\(\);.a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
-const keyRegex = /^[\(\)a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
+const keyRegex = /^[\(\)\/a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
 const directoryRegex = /^\/([a-zA-Z0-9_-\s]+\/)*/;
 const prefixRegex = /^([\(\)a-zA-Z0-9_-\s]+\/)*/;
 

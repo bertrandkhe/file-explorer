@@ -7,7 +7,7 @@ import { useAtom } from 'jotai';
 import { atomWithReducer } from 'jotai/utils';
 import { newFolderDialogVisibleAtom } from './NewFolderDialog';
 import { useUploadControls } from './UploadsService';
-import { allowedExtensionsAtom, cwdAtom } from './FileBrowser.atoms';
+import { allowedExtensionsAtom, cwdAtom, secondaryPanelContentAtom } from './FileBrowser.atoms';
 import ContextMenu from './utils/ContextMenu';
 import { usePermissions } from './permissions';
 
@@ -86,6 +86,7 @@ export const useCanOpenGlobalContextMenu = (): boolean => {
 
 const GlobalContextMenu: React.FC = () => {
   const [contextMenuState, dispatchContextMenuState] = useAtom(contextMenuStateAtom);
+  const [, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
   const { uploadFiles } = useUploadControls();
   const [, setNewFolderDialogVisible] = useAtom(newFolderDialogVisibleAtom);
   const [allowedExtensions] = useAtom(allowedExtensionsAtom);
@@ -106,6 +107,7 @@ const GlobalContextMenu: React.FC = () => {
       fileList: files,
       directory: cwd,
     });
+    setSecondaryPanelContent('uploads');
     closeContextMenu();
   }
 

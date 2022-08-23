@@ -25,6 +25,7 @@ import {
 } from './permissions';
 import { ViewMode } from './FileList/atoms';
 import FileBrowserActions from './FileBrowserActions';
+import { grey } from '@mui/material/colors';
 
 const PREFIX = 'FileBrowser';
 
@@ -72,6 +73,7 @@ const Root = styled('div')(() => css`
     transition: width 0.2s;
     background: white;
     position: relative;
+    border-left: 1px solid ${grey[300]};
   }
 
 
@@ -167,7 +169,12 @@ const ScopedFileBrowser: React.FC<ScopedFileBrowserProps> = (props) => {
           [viewModeAtom, props.viewMode || 'list'],
           [permissionsAtom, props.permissions || grantAllPermissions],
           [cwdAtom, '/'],
-          [allowedExtensionsAtom, props.allowedExtensions || []]
+          [allowedExtensionsAtom, (props.allowedExtensions || []).map((ext) => {
+            if (ext.startsWith('.')) {
+              return ext;
+            }
+            return `.${ext}`;
+          })]
         ] as Iterable<[Atom<unknown>, unknown]>}
       >
         <FileBrowser />

@@ -1,10 +1,6 @@
 import {
   css,
-  ImageListItem,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
+  CircularProgress,
   Paper,
   styled,
 } from '@mui/material';
@@ -31,6 +27,7 @@ import {
   ItemData,
   viewModeAtom,
 } from './atoms';
+import { allowedExtensionsAtom } from '../FileBrowser.atoms';
 
 const PREFIX = 'FileList';
 
@@ -51,6 +48,7 @@ const classes = {
   dragImage: `${PREFIX}-dragImage`,
   dragImageIcon: `${PREFIX}-dragImageIcon`,
   dragImageLabel: `${PREFIX}-dragImageLabel`,
+  loader: `${PREFIX}-loader`,
 };
 
 const gridItemWidth = 144;
@@ -58,7 +56,10 @@ const gridItemHeight = 160;
 const listItemHeight = 48;
 
 const Root = styled('div')(() => css`
-  overflow: auto;
+  & {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
   .${classes.listItem} {
     padding: 0;
     &.hovered {
@@ -112,7 +113,7 @@ const Root = styled('div')(() => css`
 
     .${classes.listItemPreviewImage} {
       width: 8rem;
-      max-height: 6rem;
+      height: 6rem;
       object-fit: scale-down;
     }
   }
@@ -186,6 +187,18 @@ const Root = styled('div')(() => css`
     border: 2px solid white;
     font-weight: bold;
   }
+
+  .${classes.loader} {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255 255 255 / 0.4)
+  }
 `);
 
 type FileListProps = {
@@ -208,15 +221,25 @@ const FileList: React.FC<FileListProps> = (props) => {
   const [, onItemClick] = useAtom(onItemClickAtom);
   const [, onContextMenu] = useAtom(onContextMenuAtom);
   const [, queueOperations] = useAtom(queueOperationsAtom); 
-  const [, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
+  const [secondaryPanelContent, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
   const [contextMenuAnchorPosition, setContextMenuAnchorPosition] = useAtom(contextMenuAnchorPositionAtom);
+  const [allowedExtensions] = useAtom(allowedExtensionsAtom);
+
   const dragImgElemRef = useRef<HTMLDivElement | null>(null);
-  const cwdParts = prefix.split('/').filter(f => f.length > 0);
   const listObjectsQuery = fileBrowser.useQuery(['ls', {
     prefix,
   }], {
     onSuccess({ folders = [], objects = [] }) {
-      setItemList({ folders, objects });
+      const filteredObjects = allowedExtensions.length > 0 
+        ? objects.filter((obj) => {
+          const ext = obj.name.split('.').pop();
+          if (!ext) {
+            return false;
+          }
+          return allowedExtensions.includes(`.${ext}`);
+        })
+        : objects;
+      setItemList({ folders, objects: filteredObjects });
     }
   });
   const listObjectsResult = listObjectsQuery.data;
@@ -248,6 +271,23 @@ const FileList: React.FC<FileListProps> = (props) => {
     queueOperations(operations);
     setSecondaryPanelContent('operations');
   };
+
+  useEffect(() => {
+    const animationDuration = 215;
+    const handleSecondaryPanelContentChange = () => {
+      setTimeout(() => {
+        window.requestAnimationFrame(() => {
+          const rootElem = rootRef.current;
+          if (!rootElem) {
+            return;
+          }
+          const rect = rootElem.getBoundingClientRect();
+          setRootDOMRect(rect);
+        });
+      }, animationDuration);
+    };
+    handleSecondaryPanelContentChange();
+  }, [secondaryPanelContent]);
 
   useEffect(() => {
     const rootElem = rootRef.current;
@@ -287,7 +327,8 @@ const FileList: React.FC<FileListProps> = (props) => {
     count: nbRows,
     getScrollElement: () => rootRef.current,
     estimateSize: () => viewMode === 'grid' ? gridItemHeight : listItemHeight,
-  })
+    debug: true,
+  });
 
   return (
     <Root 
@@ -331,17 +372,6 @@ const FileList: React.FC<FileListProps> = (props) => {
           </div>
         </Paper>
       </div>
-      {/* <ListItem className={clsx(classes.listItem, classes.backItem)}>
-        <ListItemButton
-          className={classes.listItemButton}
-          onClick={() => navigate(`/${cwdParts.slice(0, -1).join('/')}`)}
-          disabled={cwd === '/'}
-        >
-          <ListItemText className={classes.listItemLabel}>
-            ..
-          </ListItemText>
-        </ListItemButton>
-      </ListItem> */}
       <div
         className={clsx(viewModeClassName)}
         style={{
@@ -351,6 +381,7 @@ const FileList: React.FC<FileListProps> = (props) => {
         }}
       >
       {rowVirtualizer.getVirtualItems().map((virtualItem) => {
+        console.log({ virtualItem });
         const start = virtualItem.index * itemsPerRow;
         const end = (virtualItem.index + 1) * itemsPerRow;
         const items = itemList.slice(start, end);
@@ -361,7 +392,7 @@ const FileList: React.FC<FileListProps> = (props) => {
               position: 'absolute',
               top: 0,
               left: 0,
-              width: '100%',
+              width: rootDOMRect?.width ? `${Math.floor(rootDOMRect.width - 16)}px` : '100%',
               height: `${virtualItem.size}px`,
               transform: `translateY(${virtualItem.start}px)`,
             }}
@@ -374,7 +405,10 @@ const FileList: React.FC<FileListProps> = (props) => {
                   <FolderListItem
                     key={folder.prefix}
                     index={folders.indexOf(folder)}
-                    onDoubleClick={() => navigate(`${folder.prefix}`)}
+                    onDoubleClick={() => {
+                      console.log(folder);
+                      navigate(`${folder.prefix}`);
+                    }}
                     data={folder}
                     classes={{
                       root: classes.listItem,
@@ -422,7 +456,9 @@ const FileList: React.FC<FileListProps> = (props) => {
       })}
       </div>
       {count === 0 && listObjectsQuery.isLoading && (
-        <div>Loading</div>
+        <div className={classes.loader}>
+          <CircularProgress />
+        </div>
       )}
     </Root>
   );

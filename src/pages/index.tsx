@@ -6,7 +6,7 @@ import FileBrowser, { denyAllPermissions, ObjectStorageAdapter } from '@/FileBro
 
 const Home: React.FC = () => {
   const adapter = useMemo<ObjectStorageAdapter>(() => {
-    return createDiskAdapter();
+    return createAliyunOssAdapter();
   }, []);
   return (
     <Paper 
@@ -16,6 +16,7 @@ const Home: React.FC = () => {
       <FileBrowser 
         adapter={adapter}
         viewMode="grid"
+        allowedExtensions={['js', 'json']}
         permissions={{
           ...denyAllPermissions,
           canUpload: true,
