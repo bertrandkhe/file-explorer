@@ -15,19 +15,10 @@
       "preserveAllComments": false
     },
     "transform": null,
-    "target": "es2018",
+    "target": "es2015",
     "loose": false,
     "externalHelpers": false,
     // Requires v1.2.50 or upper and requires target to be es2016 or upper.
     "keepClassNames": true
-  },
-  "module": {
-    "type": "commonjs",
-    // These are defaults.
-    "strict": false,
-    "strictMode": true,
-    "lazy": false,
-    "noInterop": false
-  },
-  "isModule": false
+  }
 }

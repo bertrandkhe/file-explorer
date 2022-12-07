@@ -1,11 +1,10 @@
 {
   "name": "@bertrandkhe/file-browser",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "scripts": {
-    "build": "rm -rf build && tsc --outDir build && swc src -d build/node/ && cp package.json build/package.json",
+    "build": "rm -rf build && tsc --outDir build && swc src -d build/ && cp package.json build/package.json",
     "publish": ""
   },
-  "main": "./node/index.js",
   "types": "./index.d.ts",
   "module": "./index.js",
   "sideEffects": false,

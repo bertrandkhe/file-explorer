@@ -17,10 +17,10 @@ import { blue } from '@mui/material/colors';
 import ItemIcon from './ItemIcon';
 import { NewOperation, queueOperationsAtom } from '../OperationsService';
 import { secondaryPanelContentAtom } from '../FileBrowser.atoms';
-import { 
+import {
   itemListAtom,
-  setItemListAtom, 
-  selectedItemListAtom, 
+  setItemListAtom,
+  selectedItemListAtom,
   onContextMenuAtom,
   onItemClickAtom,
   contextMenuAnchorPositionAtom,
@@ -207,7 +207,7 @@ type FileListProps = {
 
 
 const FileList: React.FC<FileListProps> = (props) => {
-  const { className } = props; 
+  const { className } = props;
   const [cwd, setCwd] = useAtom(cwdAtom);
   const prefix = useMemo(() => {
     return cwd.slice(1);
@@ -220,7 +220,7 @@ const FileList: React.FC<FileListProps> = (props) => {
   const [selectedItemList, dispatchToSelectedItemList] = useAtom(selectedItemListAtom);
   const [, onItemClick] = useAtom(onItemClickAtom);
   const [, onContextMenu] = useAtom(onContextMenuAtom);
-  const [, queueOperations] = useAtom(queueOperationsAtom); 
+  const [, queueOperations] = useAtom(queueOperationsAtom);
   const [secondaryPanelContent, setSecondaryPanelContent] = useAtom(secondaryPanelContentAtom);
   const [contextMenuAnchorPosition, setContextMenuAnchorPosition] = useAtom(contextMenuAnchorPositionAtom);
   const [allowedExtensions] = useAtom(allowedExtensionsAtom);
@@ -228,21 +228,26 @@ const FileList: React.FC<FileListProps> = (props) => {
   const dragImgElemRef = useRef<HTMLDivElement | null>(null);
   const listObjectsQuery = fileBrowser.useQuery(['ls', {
     prefix,
-  }], {
-    onSuccess({ folders = [], objects = [] }) {
-      const filteredObjects = allowedExtensions.length > 0 
-        ? objects.filter((obj) => {
-          const ext = obj.name.split('.').pop();
-          if (!ext) {
-            return false;
-          }
-          return allowedExtensions.includes(`.${ext}`);
-        })
-        : objects;
-      setItemList({ folders, objects: filteredObjects });
-    }
-  });
+  }]);
   const listObjectsResult = listObjectsQuery.data;
+
+  useEffect(() => {
+    if (!listObjectsResult) {
+      return;
+    }
+    const { folders = [], objects = [] } = listObjectsResult;
+    const filteredObjects = allowedExtensions.length > 0
+      ? objects.filter((obj) => {
+        const ext = obj.name.split('.').pop();
+        if (!ext) {
+          return false;
+        }
+        return allowedExtensions.includes(`.${ext}`);
+      })
+      : objects;
+    setItemList({ folders, objects: filteredObjects });
+  }, [listObjectsResult]);
+
   const { folders = [], objects = [], count = 0 } = listObjectsResult || {};
   const navigate = (prefix: string) => {
     dispatchToSelectedItemList({ type: 'reset' });
@@ -316,7 +321,7 @@ const FileList: React.FC<FileListProps> = (props) => {
       return 1;
     }
     return Math.max(
-      viewMode === 'grid' 
+      viewMode === 'grid'
         ? Math.floor(rootDOMRect.width / gridItemWidth)
         : 1
       , 1
@@ -331,18 +336,18 @@ const FileList: React.FC<FileListProps> = (props) => {
   });
 
   return (
-    <Root 
+    <Root
       className={clsx(classes.root, className)}
       ref={rootRef}
     >
-      <ListItemContextMenu 
+      <ListItemContextMenu
         anchorReference="anchorPosition"
         anchorPosition={contextMenuAnchorPosition}
         open={Boolean(contextMenuAnchorPosition)}
         onClose={() => setContextMenuAnchorPosition()}
       />
       <div
-        className={classes.dragImageContainer} 
+        className={classes.dragImageContainer}
         ref={dragImgElemRef}
       >
         <Paper
@@ -354,9 +359,9 @@ const FileList: React.FC<FileListProps> = (props) => {
               {selectedItemList.slice(0, 8).map((item, i, arr) => {
                 const offset = (i + 1 - arr.length);
                 return (
-                  <ItemIcon 
+                  <ItemIcon
                     key={i}
-                    item={item} 
+                    item={item}
                     className={classes.dragImageIcon}
                     style={{
                       top: `${offset}px`,
@@ -381,7 +386,6 @@ const FileList: React.FC<FileListProps> = (props) => {
         }}
       >
       {rowVirtualizer.getVirtualItems().map((virtualItem) => {
-        console.log({ virtualItem });
         const start = virtualItem.index * itemsPerRow;
         const end = (virtualItem.index + 1) * itemsPerRow;
         const items = itemList.slice(start, end);
@@ -429,7 +433,7 @@ const FileList: React.FC<FileListProps> = (props) => {
               }
               const obj = item;
               return (
-                <ObjectListItem 
+                <ObjectListItem
                   data={obj}
                   index={objects.indexOf(obj)}
                   key={obj.key}
