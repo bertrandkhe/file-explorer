@@ -1,7 +1,6 @@
 import { Paper } from '@mui/material';
 import React, { useMemo } from 'react';
 import createAliyunOssAdapter from '../adapters/aliyunOssAdapter';
-import createDiskAdapter from '../adapters/diskAdapter';
 import FileBrowser, { denyAllPermissions, ObjectStorageAdapter } from '@/FileBrowser';
 
 const Home: React.FC = () => {
@@ -16,7 +15,6 @@ const Home: React.FC = () => {
       <FileBrowser 
         adapter={adapter}
         viewMode="grid"
-        allowedExtensions={['js', 'json']}
         permissions={{
           ...denyAllPermissions,
           canUpload: true,

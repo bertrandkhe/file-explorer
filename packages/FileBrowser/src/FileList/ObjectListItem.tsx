@@ -7,7 +7,7 @@ import {
   styled,
   css,
 } from '@mui/material';
-import filesize from 'filesize';
+import { partial } from 'filesize';
 import dayjs from 'dayjs';
 import clsx from 'clsx';
 import { fileBrowser, Object } from '../fileBrowser.lib';
@@ -80,7 +80,7 @@ const Root = styled('div')(() => css`
   }
 `);
 
-const humanSize = filesize.partial({base: 2, standard: "jedec"});
+const humanSize = partial({base: 2, standard: "jedec"});
 
 const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
   const { 
@@ -175,7 +175,7 @@ const ObjectListItem: React.FC<ObjectListItemProps> = (props) => {
                   {dayjs(lastModified).format('MMM D, YYYY h:mm A	')}
                 </div>
                 <div className={clsx(classes.size, propsClasses.col)}>
-                  {humanSize(size)}
+                  {humanSize(size) as string}
                 </div> 
                 <div className={propsClasses.col}>
                   {getFileType(extension)}

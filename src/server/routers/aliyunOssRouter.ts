@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import dayjs from 'dayjs';
 import { TRPCError } from '@trpc/server';
-import { createRouter } from '../utils/createRouter';
+import { router, procedure } from '../trpc';
 import {
   ossBucket,
   ossBucketUrl,
@@ -10,18 +10,18 @@ import {
 import { createPostObjectData, ListObjectsResult, signedFetch, signUrl } from '../utils/aliyun.oss.sdk';
 
 const filenameRegex = /^[\(\);.a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
-const keyRegex = /^[\(\)\/a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
-const directoryRegex = /^\/([a-zA-Z0-9_-\s]+\/)*/;
+const keyRegex = /^[\(\)a-zA-Z0-9_-\s]{1,128}\.[a-z]{2,4}$/;
+// const directoryRegex = /^\/([a-zA-Z0-9_-\s]+\/)*/;
 const prefixRegex = /^([\(\)a-zA-Z0-9_-\s]+\/)*/;
 
-export const aliyunOSSRouter = createRouter()
-  .query('postTmpObjectData', {
-    input: z.object({
+export const aliyunOssRouter = router({
+  postTmpObjectData: procedure
+    .input(z.object({
       filename: z.string().regex(filenameRegex),
       contentType: z.string().regex(/^[a-z]+\/[a-z]+/).optional(),
       filesize: z.number().positive().lte(ossMaxObjectSize),
-    }),
-    async resolve({ input }) {
+    }))
+    .query(({ input }) => {
       const {
         filename, 
         contentType,
@@ -33,15 +33,14 @@ export const aliyunOSSRouter = createRouter()
         contentType,
         filesize,
       });      
-    },
-  })
-  .query('postObjectData', {
-    input: z.object({
+    }),
+  postObjectData: procedure
+    .input(z.object({
       key: z.string().regex(keyRegex),
       contentType: z.string().regex(/^[a-z]+\/[a-z]+/i).optional(),
       filesize: z.number().positive().lte(ossMaxObjectSize),
-    }),
-    async resolve({ input }) {
+    }))
+    .query(({ input }) => {
       const {
         key, 
         contentType,
@@ -52,50 +51,46 @@ export const aliyunOSSRouter = createRouter()
         contentType,
         filesize,
       });      
-    },
-  })
-  .query('signUrl', {
-    input: z.object({
-      url: z.string().url(),
     }),
-    async resolve({ input }) {
+  signUrl: procedure
+    .input(z.object({
+      url: z.string().url(),
+    }))
+    .query(({ input }) => {
       return signUrl({
         ...input,
       });
-    },
-  })
-  .query('imagePreviewUrl', {
-    input: z.object({
+    }),
+  imagePreviewUrl: procedure
+    .input(z.object({
       key: z.string().regex(keyRegex),
       expires: z.number().optional(),
       width: z.number(),
-    }),
-    async resolve({ input }) {
+    }))
+    .query(({ input }) => {
       const endpoint = `${ossBucketUrl}/${input.key}?x-oss-process=image/resize,w_${input.width}/quality,q_70/format,webp`;
       return signUrl({
         url: endpoint,
         expires: input.expires,
       });
-    },
-  })
-  .query('objectUrl', {
-    input: z.object({
+    }),
+  objectUrl: procedure
+    .input(z.object({
       key: z.string().regex(keyRegex),
       expires: z.number().optional(),
-    }),
-    async resolve({ input }) {
+    }))
+    .query(({ input }) => {
       const endpoint = `${ossBucketUrl}/${input.key}`;
       return signUrl({
         url: endpoint,
         expires: input.expires,
       });
-    },
-  })
-  .query('objectMeta', {
-    input: z.object({
-      key: z.string(),
     }),
-    async resolve({ input }) {
+  objectMeta: procedure
+    .input(z.object({
+      key: z.string().regex(keyRegex),
+    }))
+    .query(async ({ input }) => {
       const endpoint = `${ossBucketUrl}/${input.key}`;
       const response = await signedFetch(endpoint, {
         method: 'HEAD',
@@ -133,31 +128,12 @@ export const aliyunOSSRouter = createRouter()
         code: 'INTERNAL_SERVER_ERROR',
         cause: await response.text(),
       });
-    }
-  })
-  .query('listObjects', {
-    input: z.object({
-      prefix: z.string().regex(prefixRegex).optional(),
     }),
-    // https://www.alibabacloud.com/help/en/object-storage-service/latest/getbucketv2
-    async resolve({ input }): Promise<{
-      objects: {
-        id: string,
-        type: 'file',
-        key: string,
-        size: number,
-        name: string,
-        lastModified: string,
-      }[],
-      folders: {
-        id: string,
-        type: 'folder',
-        prefix: string,
-        name: string,
-      }[]
-      isTruncated: boolean,
-      count: number,
-    }> {
+  listObjects: procedure
+    .input(z.object({
+      prefix: z.string().regex(prefixRegex).optional(),
+    }))
+    .query(async ({ input }) => {
       const { prefix = '' } = input;
       const endpointUrl = new URL(ossBucketUrl);
       endpointUrl.searchParams.set('list-type', '2');
@@ -177,7 +153,7 @@ export const aliyunOSSRouter = createRouter()
         ? resultContents 
         : [resultContents];
       // Skip first item if it is the folder.
-      if (contentsArray.length > 0 && contentsArray[0].Key.endsWith('/')) {
+      if (contentsArray.length >= 1 && contentsArray[0]?.Key.endsWith('/')) {
         contentsArray.shift();
       }
       const commonPrefixesArray = Array.isArray(resultCommonPrefixes) ? resultCommonPrefixes : [resultCommonPrefixes];
@@ -202,26 +178,24 @@ export const aliyunOSSRouter = createRouter()
         count: listObjectsResult.ListBucketResult.KeyCount,
       };
       return normalizedResult;
-    },
-  })
-  .mutation('createFolder', {
-    input: z.object({
-      key: z.string()
+
     }),
-    async resolve({ input }) {
+  createFolder: procedure
+    .input(z.object({
+      key: z.string()
+    }))
+    .mutation(async ({ input }) => {
       const endpoint = `${ossBucketUrl}/${input.key}`.replace(/\/?$/, '/');
-      const response = await signedFetch(endpoint, {
+      await signedFetch(endpoint, {
         method: 'PUT',
       });
-      return 'hello';
-    }
-  })
-  .mutation('rename', {
-    input: z.object({
+    }),
+  rename: procedure
+    .input(z.object({
       destination: z.string().regex(keyRegex),
       source: z.string().regex(keyRegex),
-    }),
-    async resolve({ input }) {
+    }))
+    .mutation(async ({ input }) => {
       const response = await signedFetch(`${ossBucketUrl}/${input.destination}?x-oss-rename`, {
         method: 'POST',
         headers: {
@@ -237,6 +211,5 @@ export const aliyunOSSRouter = createRouter()
           code: 'INTERNAL_SERVER_ERROR',
         });
       }
-    }
-  })
-;
+    }),
+});

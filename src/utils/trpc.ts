@@ -1,5 +1,5 @@
-import { createReactQueryHooks } from '@trpc/react';
-import { createTRPCClient } from '@trpc/client';
+import { httpBatchLink, createTRPCProxyClient } from '@trpc/client';
+import { createTRPCNext } from '@trpc/next';
 import type { inferProcedureInput, inferProcedureOutput } from '@trpc/server';
 import superjson from 'superjson';
 import type { AppRouter } from '../server/routers/_app';
@@ -10,13 +10,28 @@ export const transformer = superjson;
  * A set of strongly-typed React hooks from your `AppRouter` type signature with `createReactQueryHooks`.
  * @link https://trpc.io/docs/react#3-create-trpc-hooks
  */
-export const trpc = createReactQueryHooks<AppRouter>();
-export const client = createTRPCClient<AppRouter>({
-  // assume localhost
-  url: `http://localhost:${process.env.PORT ?? 3000}/api/trpc`,
-  transformer,
+export const trpc = createTRPCNext<AppRouter>({
+  config() {
+    return {
+      links: [
+        httpBatchLink({
+          url: `http://localhost:${process.env.PORT ?? 3000}/api/trpc`,
+        }),
+      ],
+      transformer,
+    };
+  },
 });
 
+
+export const trpcClient = createTRPCProxyClient<AppRouter>({
+  links: [
+    httpBatchLink({
+      url: `http://localhost:${process.env.PORT ?? 3000}/api/trpc`,
+    }),
+  ],
+  transformer,
+});
 
 /**
  * This is a helper method to infer the output of a query resolver

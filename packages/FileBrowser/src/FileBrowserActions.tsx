@@ -12,16 +12,16 @@ const classes = {
 };
 
 
-const Root = styled('div')(() => css`
+const Root = styled('div')(({ theme }) => css`
   & {
     display: flex;
     justify-content: flex-end;
-    padding: 0.5rem 0;
+    padding: ${theme.spacing(1)} 0;
     border-top: 1px solid ${grey[300]};
   }
 
   .MuiButton-root {
-    margin-right: 0.5rem;
+    margin-right: ${theme.spacing(1)};
     &:last-of-type {
       margin-right: 0;
     }

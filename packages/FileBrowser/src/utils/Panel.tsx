@@ -20,7 +20,7 @@ const Root = styled('div')(({ theme }) => css`
   .${classes.header} {
     background: ${grey[900]};
     color: ${grey[200]};
-    padding: 0.5rem 1rem 0.5rem 2rem;
+    padding: ${theme.spacing(1)} ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(4)};
     display: flex;
     align-items: center;
   }

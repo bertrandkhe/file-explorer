@@ -55,7 +55,7 @@ const gridItemWidth = 144;
 const gridItemHeight = 160;
 const listItemHeight = 48;
 
-const Root = styled('div')(() => css`
+const Root = styled('div')(({ theme }) => css`
   & {
     overflow-y: auto;
     overflow-x: hidden;
@@ -95,7 +95,7 @@ const Root = styled('div')(() => css`
     }
 
     .${classes.listItemButton} {
-      padding: 0.5rem;
+      padding: ${theme.spacing(1)};
       overflow: hidden;
       display: flex;
       flex-direction: column;
@@ -106,14 +106,14 @@ const Root = styled('div')(() => css`
       min-width: 0;
 
       .MuiSvgIcon-root {
-        width: 4rem;
-        height: 4rem;
+        width: ${theme.spacing(8)};
+        height: ${theme.spacing(8)};
       }
     }
 
     .${classes.listItemPreviewImage} {
-      width: 8rem;
-      height: 6rem;
+      width: ${theme.spacing(8)};
+      height: ${theme.spacing(6)};
       object-fit: scale-down;
     }
   }
@@ -130,8 +130,8 @@ const Root = styled('div')(() => css`
     }
 
     .${classes.listItemIcon} {
-      margin-top: 0.25rem;
-      margin-bottom: 0.25rem;
+      margin-top: ${theme.spacing(0.5)};
+      margin-bottom: ${theme.spacing(0.5)};
     }
     .${classes.listItemLabel} {
       display: grid;
@@ -410,7 +410,6 @@ const FileList: React.FC<FileListProps> = (props) => {
                     key={folder.prefix}
                     index={folders.indexOf(folder)}
                     onDoubleClick={() => {
-                      console.log(folder);
                       navigate(`${folder.prefix}`);
                     }}
                     data={folder}

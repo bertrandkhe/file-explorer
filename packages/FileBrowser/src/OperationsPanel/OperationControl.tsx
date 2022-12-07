@@ -27,14 +27,14 @@ const classes = {
   errorMsg: `${PREFIX}-errorMsg`,
 };
 
-const Root = styled('div')(() => css`
-  padding: 0.6rem 1rem 0.5rem 1.25rem;
+const Root = styled('div')(({ theme }) => css`
+  padding: ${theme.spacing(1.2)} ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(2.5)};
   border-bottom: 1px solid ${grey[300]};
   display: grid;
   grid-template:
-    "label actions" 2.25rem
+    "label actions" ${theme.spacing(4.5)}
     "progress progress" 4px
-    / 1fr 4.5rem
+    / 1fr ${theme.spacing(9)} 
   ;
 
   .${classes.progress} {
@@ -42,11 +42,11 @@ const Root = styled('div')(() => css`
   }
 
   .${classes.label} {
-    font-size: 0.8em;
+    font-size: ${theme.typography.fontSize * 0.8};
   }
 
   .${classes.status} {
-    font-size: 0.65rem;
+    font-size: ${theme.typography.fontSize * 0.65};
     color:  ${grey[600]};
   }
 

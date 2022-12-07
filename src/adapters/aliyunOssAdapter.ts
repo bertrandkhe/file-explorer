@@ -4,10 +4,9 @@ import {
   ObjectMeta,
   Object,
 } from "@/FileBrowser";
-import { client } from "../utils/trpc";
+import { trpcClient } from "../utils/trpc";
 
-
-const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
+export const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
   async ls(args: { prefix: string; }): Promise<{ 
     objects: Object[];
     folders: Folder[];
@@ -15,7 +14,7 @@ const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
     count: number; 
   }> {
     const prefix = args.prefix.startsWith('/') ? args.prefix.slice(1) : args.prefix;
-    const result = await client.query('aliyun_oss.listObjects', {
+    const result = await trpcClient.aliyunOss.listObjects.query({
       prefix,
     });
     return result;
@@ -23,14 +22,14 @@ const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
   async upload(args: Parameters<ObjectStorageAdapter['upload']>[0]): Promise<string> {
     const { key, file, onProgress, onReady } = args;
     try {
-      await client.query('aliyun_oss.objectMeta', {
+      await trpcClient.aliyunOss.objectMeta.query({
         key,
       });
       return Promise.reject(new Error('Upload failed. A file with this name already exists.'));
     } catch (err) {
       // Normal flow
     }
-    const signData = await client.query('aliyun_oss.postObjectData', {
+    const signData = await trpcClient.aliyunOss.postObjectData.query({
       key: key,
       contentType: file.type.length > 0 ? file.type : undefined,
       filesize: file.size,
@@ -59,19 +58,19 @@ const createAliyunOssAdapter = (): ObjectStorageAdapter => ({
     });
   },
   async mkdir(args: { key: string; }): Promise<void> {
-    await client.mutation('aliyun_oss.createFolder', args);
+    await trpcClient.aliyunOss.createFolder.mutate(args);
   },
   async rename(args: { source: string; destination: string; }): Promise<void> {
-    await client.mutation('aliyun_oss.rename', args);
+    await trpcClient.aliyunOss.rename.mutate(args);
   },
   async imagePreviewUrl(args: Parameters<ObjectStorageAdapter['imagePreviewUrl']>[0]) {
-    return client.query('aliyun_oss.imagePreviewUrl', args);
+    return trpcClient.aliyunOss.imagePreviewUrl.query(args);
   },
   async objectUrl(args: Parameters<ObjectStorageAdapter['objectUrl']>[0]): Promise<string> {
-    return client.query('aliyun_oss.objectUrl', args);
+    return trpcClient.aliyunOss.objectUrl.query(args);
   },
   async objectMeta(args: Parameters<ObjectStorageAdapter['objectMeta']>[0]): Promise<ObjectMeta> {
-    return client.query('aliyun_oss.objectMeta', args);
+    return trpcClient.aliyunOss.objectMeta.query(args);
   },
   async delete(args: Parameters<ObjectStorageAdapter['delete']>[0]): Promise<void> {
     throw new Error("Function not implemented.");

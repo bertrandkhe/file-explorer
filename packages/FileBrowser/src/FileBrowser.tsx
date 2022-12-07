@@ -41,7 +41,7 @@ const classes = {
   secondaryPanelVisible: `${PREFIX}-secondaryPanelVisible`,
 };
 
-const Root = styled('div')(() => css`
+const Root = styled('div')(({ theme }) => css`
   position: relative;
   height: 100%;
   width: 100%;
@@ -56,15 +56,15 @@ const Root = styled('div')(() => css`
     overflow: auto;
     transition: width 0.2s;
     position: relative;
-    padding: 1rem 1.5rem;
+    padding: ${theme.spacing(2)} ${theme.spacing(3)};
   }
 
   .${classes.mainGrid} {
     height: 100%;
     width: 100%;
     display: grid;
-    grid-template: 4rem 1fr 3.5rem / 1fr;
-    grid-row-gap: 0.25rem;
+    grid-template: ${theme.spacing(8)} 1fr ${theme.spacing(7)} / 1fr;
+    grid-row-gap: ${theme.spacing(0.5)};
   }
 
   .${classes.secondaryPanel} {

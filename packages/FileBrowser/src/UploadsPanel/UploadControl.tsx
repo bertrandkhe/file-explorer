@@ -21,8 +21,8 @@ const classes = {
   error: `${PREFIX}-error`,
 };
 
-const Root = styled(ListItem)(() => css`
-  padding: 0.5rem 1rem 0.5rem 2rem;
+const Root = styled(ListItem)(({ theme }) => css`
+  padding: ${theme.spacing(1)} ${theme.spacing(2)} ${theme.spacing(1)} ${theme.spacing(4)};
   border-bottom: 1px solid ${grey[300]};
   flex-direction: column;
   align-items: flex-start;
@@ -33,7 +33,7 @@ const Root = styled(ListItem)(() => css`
 
   .${classes.progress} {
     width: 100%;
-    padding-right: 2.5rem;
+    padding-right: ${theme.spacing(5)};
   }
 
   .${classes.label} {
@@ -68,7 +68,7 @@ const Root = styled(ListItem)(() => css`
   }
   
   .${classes.actions} {
-    margin-left: 0.5rem;
+    margin-left: ${theme.spacing(1)};
     display: flex;
     justify-content: flex-end;
   }

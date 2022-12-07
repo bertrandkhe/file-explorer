@@ -1,12 +1,8 @@
-import { aliyunOSSRouter } from './aliyun.oss';
-import { diskRouter } from './disk';
-import { transformer } from '../../utils/trpc';
-import { createRouter } from '../utils/createRouter';
+import { router } from "../trpc";
+import { aliyunOssRouter } from "./aliyunOssRouter";
 
-export const appRouter = createRouter()
-  .transformer(transformer)
-  .merge('aliyun_oss.', aliyunOSSRouter)
-  .merge('disk.', diskRouter)
-;
+export const appRouter = router({
+  aliyunOss: aliyunOssRouter,
+});
 
 export type AppRouter = typeof appRouter;

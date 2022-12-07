@@ -108,7 +108,6 @@ export const closeOperationAtom = atom(
 export const startOperationAtom = atom(
   null,
   (get, set, op: Operation) => {
-    console.log(op);
     switch (op.status) {
       case OperationStatus.IN_PROGRESS:
       case OperationStatus.DONE:  

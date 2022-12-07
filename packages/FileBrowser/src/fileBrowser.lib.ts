@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ModalProps } from '@mui/material';
-import { UseQueryResult, useMutation, useQuery, UseQueryOptions, UseMutationResult, UseMutationOptions, useQueryClient, QueryClient } from 'react-query';
+import { UseQueryResult, useMutation, useQuery, UseQueryOptions, UseMutationResult, UseMutationOptions, useQueryClient, QueryClient } from '@tanstack/react-query';
 
 export interface Object {
   id: string,
