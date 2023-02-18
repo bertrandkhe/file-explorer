@@ -42,11 +42,11 @@ const Root = styled('div')(({ theme }) => css`
   }
 
   .${classes.label} {
-    font-size: ${theme.typography.fontSize * 0.8};
+    font-size: ${theme.typography.fontSize * 0.8}px;
   }
 
   .${classes.status} {
-    font-size: ${theme.typography.fontSize * 0.65};
+    font-size: ${theme.typography.fontSize * 0.65}px;
     color:  ${grey[600]};
   }
 

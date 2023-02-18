@@ -14,7 +14,7 @@ const classes = {
   list: `${PREFIX}-list`,
 };
 
-const Root = styled(Panel)(({ theme }) => css`
+const Root = styled(Panel)(() => css`
   .${classes.list} {
     overflow-y: auto;
   }

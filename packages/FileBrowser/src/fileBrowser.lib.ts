@@ -39,7 +39,7 @@ export type LsResult = {
 };
 
 export interface ObjectStorageAdapter {
-  ls(args: { 
+  ls(args: {
     prefix: string
   }): Promise<LsResult>
 
@@ -131,7 +131,8 @@ export const useFileBrowserContext = (): FileBrowserContextValue => {
 }
 
 export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
-  prefix: QueryKeyPrefix
+  prefix: QueryKeyPrefix,
+  adapter?: ObjectStorageAdapter,
 }): ReactQueryHooks<QueryKeyPrefix> => {
   const { prefix } = options;
   let queryClient = null as QueryClient | null;
@@ -150,6 +151,13 @@ export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
     ]);
   };
 
+  const useAdapter = options.adapter ? () => {
+    return options.adapter as ObjectStorageAdapter;
+  } : () => {
+    const { adapter } = useFileBrowserContext();
+    return adapter;
+  }
+
   return {
     getQueryKey,
     useInvalidateQueries() {
@@ -158,7 +166,7 @@ export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
     },
 
     useQuery(args, options) {
-      const { adapter } = useFileBrowserContext();
+      const adapter = useAdapter();
       const operation = args[0];
       const queryFn = adapter[operation];
       const queryKey = [this.getQueryKey(args[0]), args[1]];
@@ -166,7 +174,7 @@ export const createReactQueryHooks = <QueryKeyPrefix extends string>(options: {
     },
 
     useMutation(args, options) {
-      const { adapter } = useFileBrowserContext();
+      const adapter = useAdapter();
       const mutateFn = adapter[args[0]];
       return useMutation<any, any, any>((vars) => {
         return mutateFn(vars as any);

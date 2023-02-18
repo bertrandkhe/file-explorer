@@ -1,6 +1,6 @@
 {
   "name": "@bertrandkhe/file-browser",
-  "version": "0.0.9",
+  "version": "0.0.11",
   "scripts": {
     "build": "rm -rf build && tsc --outDir build && swc src -d build/ && cp package.json build/package.json",
     "publish": ""

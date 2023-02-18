@@ -7,6 +7,10 @@ export type {
   ObjectStorageAdapter,
 } from './fileBrowser.lib';
 
+export {
+  createReactQueryHooks,
+} from './fileBrowser.lib';
+
 export type {
   Permissions,
 } from './permissions';

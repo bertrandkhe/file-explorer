@@ -46,6 +46,7 @@ const Root = styled('div')(({ theme }) => css`
   height: 100%;
   width: 100%;
   display: flex;
+  font-size: ${theme.typography.fontSize}px;
   * {
     box-sizing: border-box;
   }

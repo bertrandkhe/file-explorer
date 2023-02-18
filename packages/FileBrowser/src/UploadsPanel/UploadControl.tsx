@@ -40,7 +40,7 @@ const Root = styled(ListItem)(({ theme }) => css`
     width: 100%;
     overflow: hidden;
     line-height: 1.1;
-    font-size: 0.9em;
+    font-size: ${theme.typography.fontSize * 0.9}px;
   }
 
   .${classes.filename} {
